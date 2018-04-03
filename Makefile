@@ -8,25 +8,26 @@ ARCH64=x64
 ARCH=$(ARCH64) # set to either one, and the right stuff will get chosen
 DEFINES=-std=c++11 #-fno-rtti -fno-exceptions -D_HAS_EXCEPTIONS=0 -D_ITERATOR_DEBUG_LEVEL=0
 _MSC_VER=1900 # 1800=VC2013, 1900=VC2015, 1910=VC2017 / others: https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B
+PROGRAMFILES=/Volumes/[C] Windows 10/Program Files (x86)
 
 # compiler system paths
-UniversalCRT_IncludePath="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Include/10.0.10150.0/ucrt"
-UniversalCRT_Lib="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH)"
-MSVC_INCLUDE="/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
-MSVC_LIB="/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH),x64),/amd64,)"
-WINSDK_LIB="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH)"
+UniversalCRT_IncludePath="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
+UniversalCRT_Lib="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH)"
+MSVC_INCLUDE="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
+MSVC_LIB="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH),x64),/amd64,)"
+WINSDK_LIB="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH)"
 
-UniversalCRT_IncludePath32="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Include/10.0.10150.0/ucrt"
-UniversalCRT_Lib32="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH32)"
-MSVC_INCLUDE32="/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
-MSVC_LIB32="/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH32),x64),/amd64,)"
-WINSDK_LIB32="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH32)"
+UniversalCRT_IncludePath32="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
+UniversalCRT_Lib32="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH32)"
+MSVC_INCLUDE32="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
+MSVC_LIB32="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH32),x64),/amd64,)"
+WINSDK_LIB32="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH32)"
 
-UniversalCRT_IncludePath64="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Include/10.0.10150.0/ucrt"
-UniversalCRT_Lib64="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH64)"
-MSVC_INCLUDE64="/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
-MSVC_LIB64="/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH64),x64),/amd64,)"
-WINSDK_LIB64="/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH64)"
+UniversalCRT_IncludePath64="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
+UniversalCRT_Lib64="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH64)"
+MSVC_INCLUDE64="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
+MSVC_LIB64="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH64),x64),/amd64,)"
+WINSDK_LIB64="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH64)"
 
 # options seem to be 64bit: x86_64-pc-windows-msvc, i686-pc-windows-msvc;  or 32bit: i386-pc-win32
 TARGET=$(if $(filter $(ARCH),x64),x86_64-pc-windows-msvc,i386-pc-win32)

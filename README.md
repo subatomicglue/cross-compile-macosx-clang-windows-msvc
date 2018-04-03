@@ -50,16 +50,9 @@ Thread model: posix
 InstalledDir: /usr/local/opt/llvm/bin
 ```
 
-Makefile:
+Build it:
 ```
 $ make
-===================
-settings:
-UniversalCRT_IncludePath:  /Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Include/10.0.10150.0/ucrt
-UniversalCRT_Lib:  /Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Lib/10.0.10150.0/ucrt/x64
-MSVC_INCLUDE:     /Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include
-MSVC_LIB:         /Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/amd64
-WINSDK_LIB:       /Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x64
 ===================
 compile some 64bit C++
 /usr/local/opt/llvm/bin/clang++ -target x86_64-pc-windows-msvc -isystem "/Volumes/[C] Windows 10/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include" -isystem "/Volumes/[C] Windows 10/Program Files (x86)/Windows Kits/10/Include/10.0.10150.0/ucrt" -fmsc-version=1900  -fms-extensions -fms-compatibility -fdelayed-template-parsing -std=c++11  -c main.cpp -o mainCPP-x64.o
@@ -79,7 +72,7 @@ compile some 32bit  C
 
 ```
 
-On Windows 10 running under Parallels:
+Run it on Windows 10 (under Parallels):
 ```
 Z:\src\cross-compile-windows>test.bat
 
