@@ -25,6 +25,8 @@ else()
    set( MSVC_LIB "${PROGRAMFILES}/Microsoft Visual Studio 14.0/VC/lib" )
    set( triple "i386-pc-win32" )
 endif()
+set( WINSDK_INC "${PROGRAMFILES}/Windows Kits/8.1/Include/um" )
+set( WINSDK_SHARED_INC32 "${PROGRAMFILES}/Windows Kits/8.1/Include/shared" )
 set( WINSDK_LIB "${PROGRAMFILES}/Windows Kits/8.1/Lib/winv6.3/um/${ARCH}" )
 
 if(CMAKE_VERBOSE_MAKEFILE)
@@ -34,9 +36,9 @@ else()
 endif()
 
 # compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
-set( SYSFLAGS "-target ${triple} -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+set( SYSFLAGS "-target ${triple} -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
 # compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
-#set( SYSFLAGS "/imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+#set( SYSFLAGS "/imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
 
 
 foreach(lang C CXX)
@@ -86,10 +88,10 @@ set( CMAKE_LIB "/usr/local/opt/llvm/bin/llvm-lib" CACHE STRING "" FORCE)
 # static library
 foreach(lang C CXX)
    set(CMAKE_${lang}_COMPILE_OBJECT "<CMAKE_${lang}_COMPILER> ${CMAKE_INCLUDE_SYSTEM_FLAG_${lang}} <DEFINES> <FLAGS> ${${lang}_COMPILE_OBJECT_OUTPUT_FLAG}<OBJECT>  ${${lang}_COMPILE_OBJECT_FLAG} ${${lang}_COMPILE_OBJECT_SOURCE_FLAG}<SOURCE>" CACHE STRING "" FORCE)
-   set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <FLAGS> <LINK_FLAGS> /subsystem:console libcmt.lib <OBJECTS> /out:<TARGET> <LINK_LIBRARIES>")
-   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "echo _CREATE_SHARED_LIBRARY;<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
+   set(CMAKE_${lang}_LINK_EXECUTABLE "echo <CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <FLAGS> <LINK_FLAGS> /subsystem:console libcmt.lib <LINK_LIBRARIES> <OBJECTS> /out:<TARGET>; <CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <FLAGS> <LINK_FLAGS> /subsystem:console libcmt.lib <LINK_LIBRARIES> <OBJECTS> /out:<TARGET>")
+   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
    set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
-   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "echo _CREATE_STATIC_LIBRARY; ${CMAKE_LIB} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <LINK_FLAGS> ${CMAKE_CL_NOLOGO} /out:<TARGET> <OBJECTS>")
+   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "${CMAKE_LIB} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <LINK_FLAGS> ${CMAKE_CL_NOLOGO} /out:<TARGET> <OBJECTS>")
    set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
 endforeach()
 
