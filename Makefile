@@ -9,6 +9,7 @@ ARCH=$(ARCH64) # set to either one, and the right stuff will get chosen
 DEFINES=-std=c++11 #-fno-rtti -fno-exceptions -D_HAS_EXCEPTIONS=0 -D_ITERATOR_DEBUG_LEVEL=0
 _MSC_VER=1900 # 1800=VC2013, 1900=VC2015, 1910=VC2017 / others: https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B
 PROGRAMFILES=/Volumes/[C] Windows 10/Program Files (x86)
+LLVM=/usr/local/opt/llvm/bin
 
 # compiler system paths
 UniversalCRT_IncludePath="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
@@ -59,118 +60,119 @@ SYSTEM_FLAGS=-fmsc-version=$(_MSC_VER) -fms-extensions -fms-compatibility -fdela
 # compiler binaries
 
 # clang compiler (GCC lookalike)
-C=/usr/local/opt/llvm/bin/clang $(TARGET) $(SYSTEM_INC) $(SYSTEM_FLAGS)
-CPP=/usr/local/opt/llvm/bin/clang++ $(TARGET) $(SYSTEM_INC)  $(SYSTEM_FLAGS)
-C32=/usr/local/opt/llvm/bin/clang $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
-CPP32=/usr/local/opt/llvm/bin/clang++ $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
-C64=/usr/local/opt/llvm/bin/clang $(TARGET_64) $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
-CPP64=/usr/local/opt/llvm/bin/clang++ $(TARGET_64)  $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
+C=$(LLVM)/clang $(TARGET) $(SYSTEM_INC) $(SYSTEM_FLAGS)
+CPP=$(LLVM)/clang++ $(TARGET) $(SYSTEM_INC)  $(SYSTEM_FLAGS)
+C32=$(LLVM)/clang $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
+CPP32=$(LLVM)/clang++ $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
+C64=$(LLVM)/clang $(TARGET_64) $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
+CPP64=$(LLVM)/clang++ $(TARGET_64)  $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
 
 # clang linker (MSVC link.exe lookalike)
-LDD=/usr/local/opt/llvm/bin/lld -flavor link $(SYSTEM_LIB_INC)
-LDD32=/usr/local/opt/llvm/bin/lld -flavor link $(SYSTEM_LIB_INC_32)
-LDD64=/usr/local/opt/llvm/bin/lld -flavor link $(SYSTEM_LIB_INC_64)
+LDD=$(LLVM)/lld -flavor link $(SYSTEM_LIB_INC)
+LDD32=$(LLVM)/lld -flavor link $(SYSTEM_LIB_INC_32)
+LDD64=$(LLVM)/lld -flavor link $(SYSTEM_LIB_INC_64)
 
 # clang's version of MSVC cl.exe compiler
-CL=/usr/local/opt/llvm/bin/clang-cl $(TARGETCL) $(SYSTEMCL_INC) $(SYSTEM_FLAGS)
-CL32=/usr/local/opt/llvm/bin/clang-cl $(TARGETCL_32) $(SYSTEMCL_INC_32) $(SYSTEM_FLAGS)
-CL64=/usr/local/opt/llvm/bin/clang-cl $(TARGETCL_64) $(SYSTEMCL_INC_64) $(SYSTEM_FLAGS)
+CL=$(LLVM)/clang-cl $(TARGETCL) $(SYSTEMCL_INC) $(SYSTEM_FLAGS)
+CL32=$(LLVM)/clang-cl $(TARGETCL_32) $(SYSTEMCL_INC_32) $(SYSTEM_FLAGS)
+CL64=$(LLVM)/clang-cl $(TARGETCL_64) $(SYSTEMCL_INC_64) $(SYSTEM_FLAGS)
 
 # clang's version of MSVC link.exe linker
-LINK=/usr/local/opt/llvm/bin/lld-link $(SYSTEM_LIB_INC)
-LINK32=/usr/local/opt/llvm/bin/lld-link $(SYSTEM_LIB_INC_32)
-LINK64=/usr/local/opt/llvm/bin/lld-link $(SYSTEM_LIB_INC_64)
+LINK=$(LLVM)/lld-link $(SYSTEM_LIB_INC)
+LINK32=$(LLVM)/lld-link $(SYSTEM_LIB_INC_32)
+LINK64=$(LLVM)/lld-link $(SYSTEM_LIB_INC_64)
 
 # /usr/local/opt/llvm/bin/llvm-lib /libpath:<path>] [/out:<output>] [/llvmlibthin] [/ignore] [/machine] [/nologo] [files…]
-LIB=/usr/local/opt/llvm/bin/llvm-lib $(SYSTEM_LIB_INC) /nologo
-LIB32=/usr/local/opt/llvm/bin/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
-LIB64=/usr/local/opt/llvm/bin/llvm-lib $(SYSTEM_LIB_INC_64) /nologo
+LIB=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC) /nologo
+LIB32=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
+LIB64=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC_64) /nologo
 
+all: exe execl lib dll
 
-all:
-	@echo "==================="
-	@echo "settings:"
-	@echo "UniversalCRT_IncludePath: " $(UniversalCRT_IncludePath)
-	@echo "UniversalCRT_Lib: " $(UniversalCRT_Lib)
-	@echo "MSVC_INCLUDE:    " $(MSVC_INCLUDE)
-	@echo "MSVC_LIB:        " $(MSVC_LIB)
-	@echo "WINSDK_LIB:      " $(WINSDK_LIB)
-	@echo "==================="
-	@echo "cland/lld compile some 64bit C++"
+# executable - compile and link windows .exe
+# using clang/clang++ -target and lld -flavor link
+exe:
+	@echo "\n==================="
+	@echo "create 64bit C++ Executable (.exe)  (using clang++ & lld)"
 	$(CPP64) $(DEFINES) -c main.cpp -o mainCPP-x64.o
 	$(LDD64) libucrt.lib libcmt.lib /subsystem:console /out:mainCPP-x64.exe mainCPP-x64.o
-	@echo "==================="
-	@echo "clang/lld compile some 64bit C"
+	@echo "\n==================="
+	@echo "create 64bit C Executable (.exe)  (using clang & lld)"
 	$(C64) -c main.c -o mainC-x64.o
 	$(LDD64) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x64.exe mainC-x64.o
-	@echo "==================="
-	@echo "clang/lld compile some 32bit C++"
+	@echo "\n==================="
+	@echo "create 32bit C++ Executable (.exe)  (using clang++ & lld)"
 	$(CPP32) $(DEFINES) -c main.cpp -o mainCPP-x86.o
 	$(LDD32) libucrt.lib libcmt.lib /subsystem:console /out:mainCPP-x86.exe mainCPP-x86.o
-	@echo "==================="
-	@echo "clang/lld compile some 32bit  C"
+	@echo "\n==================="
+	@echo "create 32bit C Executable (.exe)  (using clang & lld)"
 	$(C32) -c main.c -o mainC-x86.o
 	$(LDD32) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x86.exe mainC-x86.o
 
-# compile using clang-cl and ldd-link
-cl:
-	@echo "==================="
-	@echo "settings:"
-	@echo "UniversalCRT_IncludePath: " $(UniversalCRT_IncludePath)
-	@echo "UniversalCRT_Lib: " $(UniversalCRT_Lib)
-	@echo "MSVC_INCLUDE:    " $(MSVC_INCLUDE)
-	@echo "MSVC_LIB:        " $(MSVC_LIB)
-	@echo "WINSDK_LIB:      " $(WINSDK_LIB)
-	@echo "==================="
-	@echo "cl/link compile some 64bit C++"
+# executable - compile and link windows .exe
+# using clang-cl and lld-link
+execl:
+	@echo "\n==================="
+	@echo "create 64bit C++ Executable (.exe) (using clang-cl & lld-link)"
 	$(CL64) /c /Tpmain.cpp /omainCPP-x64.o
-	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:mainCPP-x64.exe mainCPP-x64.o
-	@echo "==================="
-	@echo "cl/link compile some 64bit C"
+	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:mainCPP-x64-cl.exe mainCPP-x64.o
+	@echo "\n==================="
+	@echo "create 64bit C Executable (.exe) (using clang-cl & lld-link)"
 	$(CL64) /c /Tcmain.c /omainC-x64.o
-	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x64.exe mainC-x64.o
-	@echo "==================="
-	@echo "cl/link compile some 32bit C++"
+	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x64-cl.exe mainC-x64.o
+	@echo "\n==================="
+	@echo "create 32bit C++ Executable (.exe) (using clang-cl & lld-link)"
 	$(CL32) /c /Tpmain.cpp /omainCPP-x86.o
-	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:mainCPP-x86.exe mainCPP-x86.o
-	@echo "==================="
-	@echo "cl/link compile some 32bit  C"
+	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:mainCPP-x86-cl.exe mainCPP-x86.o
+	@echo "\n==================="
+	@echo "create 32bit  C Executable (.exe) (using clang-cl & lld-link)"
 	$(CL32) /c /Tcmain.c /omainC-x86.o
-	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x86.exe mainC-x86.o
+	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x86-cl.exe mainC-x86.o
 
+# static linking - compile .lib and link into a windows .exe
+# using clang-cl and lld-link
 lib:
-	@echo "==================="
-	@echo "cl/lib/link compile some 64bit C++ Library"
+	@echo "\n==================="
+	@echo "create 64bit C++ Library (.lib)"
 	$(CPP64) $(DEFINES) -c lib.cpp -o lib-x64.o
 	$(LIB64) /out:lib-x64.lib lib-x64.o
+	@echo "\nstatically link that lib into a 64bit Executable (.exe)"
 	$(CPP64) $(DEFINES) -c libmain.cpp -o libmain-x64.o
 	$(LINK64) libucrt.lib libcmt.lib lib-x64.lib /subsystem:console /out:libmain-x64.exe libmain-x64.o
-	@echo "==================="
-	@echo "cl/lib/link compile some 32bit C++ Library"
+	@echo "\n==================="
+	@echo "create 32bit C++ Library (.lib)"
 	$(CPP32) $(DEFINES) -c lib.cpp -o lib-x86.o
 	$(LIB32) /out:lib-x86.lib lib-x86.o
+	@echo "\nstatically link that lib into a 64bit Executable (.exe)"
 	$(CPP32) $(DEFINES) -c libmain.cpp -o libmain-x86.o
 	$(LINK32) libucrt.lib libcmt.lib lib-x86.lib /subsystem:console /out:libmain-x86.exe libmain-x86.o
 
 
-# DLL example:
+# dynamic linking - compile .lib/.dll and link into a windows .exe
+# dynamic loading - create a standalone windows .exe which loads a dll, retreives a function, and calls it
+# using clang++ and lld-link
 dll:
-	@echo "==================="
-	@echo "cl/link compile some 64bit C++ DLL"
+	@echo "\n==================="
+	@echo "create 64bit C++ DLL (.lib/.dll)"
 	$(CPP64) $(DEFINES) -c dll.cpp -o dll-x64.o
-	$(CPP64) $(DEFINES) -c dllmain.cpp -o dllmain-x64.o
 	$(LINK64) libucrt.lib libcmt.lib /dll /out:dll-x64.dll dll-x64.o
+	@echo "\ndynamic link DLL into a 64bit Executable (.exe)"
+	$(CPP64) $(DEFINES) -c dllmain.cpp -o dllmain-x64.o
 	$(LINK64) libucrt.lib libcmt.lib dll-x64.lib /subsystem:console /out:dllmain-x64.exe dllmain-x64.o
+	@echo "\ndynamic load DLL from a 64bit standalone Executable (.exe)"
 	$(CPP64) $(DEFINES) -c plugin.cpp -o plugin-x64.o
 	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:plugin-x64.exe plugin-x64.o
-	@echo "==================="
-	@echo "cl/link compile some 32bit C++ DLL"
+	@echo "\n==================="
+	@echo "create 32bit C++ DLL (.lib/.dll)"
 	$(CPP32) $(DEFINES) -c dll.cpp -o dll-x86.o
-	$(CPP32) $(DEFINES) -c dllmain.cpp -o dllmain-x86.o
 	$(LINK32) libucrt.lib libcmt.lib /dll /out:dll-x86.dll dll-x86.o
+	@echo "\ndynamic link DLL into a 32bit Executable (.exe)"
+	$(CPP32) $(DEFINES) -c dllmain.cpp -o dllmain-x86.o
 	$(LINK32) libucrt.lib libcmt.lib dll-x86.lib /subsystem:console /out:dllmain-x86.exe dllmain-x86.o
+	@echo "\ndynamic load DLL from a 32bit standalone Executable (.exe)"
 	$(CPP32) $(DEFINES) -c plugin.cpp -o plugin-x86.o
 	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:plugin-x86.exe plugin-x86.o
+
 
 
 clean:
