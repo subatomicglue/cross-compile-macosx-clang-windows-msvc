@@ -177,5 +177,5 @@ dll:
 
 
 clean:
-	rm *.o *.exe
+	rm -f *.o *.exe *.dll *.lib *.obj
 
