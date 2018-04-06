@@ -82,6 +82,7 @@ LINK=$(LLVM)/lld-link $(SYSTEM_LIB_INC)
 LINK32=$(LLVM)/lld-link $(SYSTEM_LIB_INC_32)
 LINK64=$(LLVM)/lld-link $(SYSTEM_LIB_INC_64)
 
+# llvm's version of MSVC lib.exe
 # /usr/local/opt/llvm/bin/llvm-lib /libpath:<path>] [/out:<output>] [/llvmlibthin] [/ignore] [/machine] [/nologo] [files…]
 LIB=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC) /nologo
 LIB32=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
