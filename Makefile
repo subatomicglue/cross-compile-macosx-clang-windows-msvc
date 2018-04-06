@@ -75,6 +75,11 @@ LINK=/usr/local/opt/llvm/bin/lld-link $(SYSTEM_LIB_INC)
 LINK32=/usr/local/opt/llvm/bin/lld-link $(SYSTEM_LIB_INC_32)
 LINK64=/usr/local/opt/llvm/bin/lld-link $(SYSTEM_LIB_INC_64)
 
+# /usr/local/opt/llvm/bin/llvm-lib /libpath:<path>] [/out:<output>] [/llvmlibthin] [/ignore] [/machine] [/nologo] [files…]
+LIB=/usr/local/opt/llvm/bin/llvm-lib $(SYSTEM_LIB_INC) /nologo
+LIB32=/usr/local/opt/llvm/bin/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
+LIB64=/usr/local/opt/llvm/bin/llvm-lib $(SYSTEM_LIB_INC_64) /nologo
+
 
 all:
 	@echo "==================="
@@ -126,6 +131,21 @@ cl:
 	@echo "cl/link compile some 32bit  C"
 	$(CL32) /c /Tcmain.c /omainC-x86.o
 	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:mainC-x86.exe mainC-x86.o
+
+lib:
+	@echo "==================="
+	@echo "cl/link compile some 64bit C++"
+	$(CPP64) $(DEFINES) -c lib.cpp -o lib-x64.o
+	$(LIB64) /out:lib-x64.lib lib-x64.o
+	$(CPP64) $(DEFINES) -c libmain.cpp -o libmain-x64.o
+	$(LINK64) libucrt.lib libcmt.lib lib-x64.lib /subsystem:console /out:libmain-x64.exe libmain-x64.o
+	@echo "==================="
+	@echo "cl/link compile some 32bit C++"
+	$(CPP32) $(DEFINES) -c lib.cpp -o lib-x86.o
+	$(LIB32) /out:lib-x86.lib lib-x86.o
+	$(CPP32) $(DEFINES) -c libmain.cpp -o libmain-x86.o
+	$(LINK32) libucrt.lib libcmt.lib lib-x86.lib /subsystem:console /out:libmain-x86.exe libmain-x86.o
+
 
 clean:
 	rm *.o *.exe
