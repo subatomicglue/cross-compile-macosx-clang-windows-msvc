@@ -15,18 +15,24 @@ UniversalCRT_IncludePath="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/u
 UniversalCRT_Lib="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH)"
 MSVC_INCLUDE="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
 MSVC_LIB="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH),x64),/amd64,)"
+WINSDK_INC="$(PROGRAMFILES)/Windows Kits/8.1/Include/um"
+WINSDK_SHARED__INC="$(PROGRAMFILES)/Windows Kits/8.1/Include/shared"
 WINSDK_LIB="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH)"
 
 UniversalCRT_IncludePath32="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
 UniversalCRT_Lib32="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH32)"
 MSVC_INCLUDE32="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
 MSVC_LIB32="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH32),x64),/amd64,)"
+WINSDK_INC32="$(PROGRAMFILES)/Windows Kits/8.1/Include/um"
+WINSDK_SHARED_INC32="$(PROGRAMFILES)/Windows Kits/8.1/Include/shared"
 WINSDK_LIB32="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH32)"
 
 UniversalCRT_IncludePath64="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
 UniversalCRT_Lib64="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH64)"
 MSVC_INCLUDE64="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
 MSVC_LIB64="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH64),x64),/amd64,)"
+WINSDK_INC64="$(PROGRAMFILES)/Windows Kits/8.1/Include/um"
+WINSDK_SHARED_INC64="$(PROGRAMFILES)/Windows Kits/8.1/Include/shared"
 WINSDK_LIB64="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH64)"
 
 # options seem to be 64bit: x86_64-pc-windows-msvc, i686-pc-windows-msvc;  or 32bit: i386-pc-win32
@@ -36,12 +42,12 @@ TARGET_64=-target x86_64-pc-windows-msvc
 TARGETCL=/arch:$(if $(filter $(ARCH),x64),-m64,-m32)
 TARGETCL_32=-m32 /arch:SSE2
 TARGETCL_64=-m64 /arch:AVX2
-SYSTEM_INC=-isystem $(MSVC_INCLUDE) -isystem $(UniversalCRT_IncludePath)
-SYSTEM_INC_32=-isystem $(MSVC_INCLUDE32) -isystem $(UniversalCRT_IncludePath32)
-SYSTEM_INC_64=-isystem $(MSVC_INCLUDE64) -isystem $(UniversalCRT_IncludePath64)
-SYSTEMCL_INC=/imsvc $(MSVC_INCLUDE) /imsvc $(UniversalCRT_IncludePath)
-SYSTEMCL_INC_32=/imsvc $(MSVC_INCLUDE32) /imsvc $(UniversalCRT_IncludePath32)
-SYSTEMCL_INC_64=/imsvc $(MSVC_INCLUDE64) /imsvc $(UniversalCRT_IncludePath64)
+SYSTEM_INC=-isystem $(MSVC_INCLUDE) -isystem $(UniversalCRT_IncludePath) -isystem $(WINSDK_INC) -isystem $(WINSDK_SHARED_INC)
+SYSTEM_INC_32=-isystem $(MSVC_INCLUDE32) -isystem $(UniversalCRT_IncludePath32) -isystem $(WINSDK_INC32) -isystem $(WINSDK_SHARED_INC32)
+SYSTEM_INC_64=-isystem $(MSVC_INCLUDE64) -isystem $(UniversalCRT_IncludePath64) -isystem $(WINSDK_INC64) -isystem $(WINSDK_SHARED_INC64)
+SYSTEMCL_INC=/imsvc $(MSVC_INCLUDE) /imsvc $(UniversalCRT_IncludePath) /imsvc $(WINSDK_INC) /imsvc $(WINSDK_SHARED_INC)
+SYSTEMCL_INC_32=/imsvc $(MSVC_INCLUDE32) /imsvc $(UniversalCRT_IncludePath32) /imsvc $(WINSDK_INC32) /imsvc $(WINSDK_SHARED_INC32)
+SYSTEMCL_INC_64=/imsvc $(MSVC_INCLUDE64) /imsvc $(UniversalCRT_IncludePath64) /imsvc $(WINSDK_INC64) /imsvc $(WINSDK_SHARED_INC64)
 SYSTEM_LIB_INC=/libpath:$(MSVC_LIB) /libpath:$(UniversalCRT_Lib) /libpath:$(WINSDK_LIB)
 SYSTEM_LIB_INC_32=/libpath:$(MSVC_LIB32) /libpath:$(UniversalCRT_Lib32) /libpath:$(WINSDK_LIB32)
 SYSTEM_LIB_INC_64=/libpath:$(MSVC_LIB64) /libpath:$(UniversalCRT_Lib64) /libpath:$(WINSDK_LIB64)
@@ -134,17 +140,37 @@ cl:
 
 lib:
 	@echo "==================="
-	@echo "cl/link compile some 64bit C++"
+	@echo "cl/lib/link compile some 64bit C++ Library"
 	$(CPP64) $(DEFINES) -c lib.cpp -o lib-x64.o
 	$(LIB64) /out:lib-x64.lib lib-x64.o
 	$(CPP64) $(DEFINES) -c libmain.cpp -o libmain-x64.o
 	$(LINK64) libucrt.lib libcmt.lib lib-x64.lib /subsystem:console /out:libmain-x64.exe libmain-x64.o
 	@echo "==================="
-	@echo "cl/link compile some 32bit C++"
+	@echo "cl/lib/link compile some 32bit C++ Library"
 	$(CPP32) $(DEFINES) -c lib.cpp -o lib-x86.o
 	$(LIB32) /out:lib-x86.lib lib-x86.o
 	$(CPP32) $(DEFINES) -c libmain.cpp -o libmain-x86.o
 	$(LINK32) libucrt.lib libcmt.lib lib-x86.lib /subsystem:console /out:libmain-x86.exe libmain-x86.o
+
+
+# DLL example:
+dll:
+	@echo "==================="
+	@echo "cl/link compile some 64bit C++ DLL"
+	$(CPP64) $(DEFINES) -c dll.cpp -o dll-x64.o
+	$(CPP64) $(DEFINES) -c dllmain.cpp -o dllmain-x64.o
+	$(LINK64) libucrt.lib libcmt.lib /dll /out:dll-x64.dll dll-x64.o
+	$(LINK64) libucrt.lib libcmt.lib dll-x64.lib /subsystem:console /out:dllmain-x64.exe dllmain-x64.o
+	$(CPP64) $(DEFINES) -c plugin.cpp -o plugin-x64.o
+	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:plugin-x64.exe plugin-x64.o
+	@echo "==================="
+	@echo "cl/link compile some 32bit C++ DLL"
+	$(CPP32) $(DEFINES) -c dll.cpp -o dll-x86.o
+	$(CPP32) $(DEFINES) -c dllmain.cpp -o dllmain-x86.o
+	$(LINK32) libucrt.lib libcmt.lib /dll /out:dll-x86.dll dll-x86.o
+	$(LINK32) libucrt.lib libcmt.lib dll-x86.lib /subsystem:console /out:dllmain-x86.exe dllmain-x86.o
+	$(CPP32) $(DEFINES) -c plugin.cpp -o plugin-x86.o
+	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:plugin-x86.exe plugin-x86.o
 
 
 clean:
