@@ -3,6 +3,12 @@
 
 Here is an example HOWTO to cross compile C/C++ from MacOSX terminal to Windows compatible binaries, using Clang.
 
+Included are examples for:
+- `.exe`
+- `.lib` (static linked)
+- `.dll` (dynamic linked)
+- `.dll` (dynamic loaded - plugin)
+
 Prerequisites:
 - MacOSX High Sierra
 - MacOSX terminal
@@ -50,6 +56,7 @@ Thread model: posix
 InstalledDir: /usr/local/opt/llvm/bin
 ```
 
+What's it look like?
 Build it:
 ```
 $ make
@@ -90,6 +97,36 @@ sizeof(size_t) == 4
 
 Z:\src\cross-compile-windows>mainC-x86.exe
 hello world!
+sizeof(size_t): 4
+
+Z:\src\cross-compile-windows>libmain-x64.exe
+Start Your Engines
+sizeof(size_t): 8
+
+Z:\src\cross-compile-windows>libmain-x86.exe
+Start Your Engines
+sizeof(size_t): 4
+
+Z:\src\cross-compile-windows>dllmain-x64.exe
+Start Your Engines
+sizeof(size_t): 8
+
+Z:\src\cross-compile-windows>dllmain-x86.exe
+Start Your Engines
+sizeof(size_t): 4
+
+Z:\src\cross-compile-windows>plugin-x64.exe
+Loading DLL plugin 'dll-x64.dll':
+Finding plugin entrypoint 'vroooom':
+Found 'vroooom', calling:
+Start Your Engines
+sizeof(size_t): 8
+
+Z:\src\cross-compile-windows>plugin-x86.exe
+Loading DLL plugin 'dll-x86.dll':
+Finding plugin entrypoint 'vroooom':
+Found 'vroooom', calling:
+Start Your Engines
 sizeof(size_t): 4
 ```
 
