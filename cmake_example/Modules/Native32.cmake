@@ -7,7 +7,7 @@
 #   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Native32.cmake -G "Visual Studio 14" ..
 
-if (NOT DEFINED WIN32)
+if (NOT WIN32)
    #message( "We're going to build using native compiler for you" )
    set( CMAKE_C_FLAGS_INIT -m32 CACHE STRING "" FORCE)
    set( CMAKE_CXX_FLAGS_INIT -m32 CACHE STRING "" FORCE)
@@ -22,12 +22,6 @@ else()
    if (NOT DEFINED CMAKE_GENERATOR)
       set( CMAKE_GENERATOR "Visual Studio 14" )
    endif()
-   #include("MSVCRuntime")
-   #configure_msvc_runtime()
-   set( CMAKE_C_FLAGS_INIT "/MT" CACHE STRING "" FORCE)
-   set( CMAKE_CXX_FLAGS_INIT "/MT" CACHE STRING "" FORCE)
-   set( CMAKE_C_FLAGS "/MT" CACHE STRING "" FORCE)
-   set( CMAKE_CXX_FLAGS "/MT" CACHE STRING "" FORCE)
    set( CMAKE_C_FLAGS_RELEASE "/MT" CACHE STRING "" FORCE)
    set( CMAKE_CXX_FLAGS_RELEASE "/MT" CACHE STRING "" FORCE)
    set( CMAKE_C_FLAGS_DEBUG "/MTd" CACHE STRING "" FORCE)
