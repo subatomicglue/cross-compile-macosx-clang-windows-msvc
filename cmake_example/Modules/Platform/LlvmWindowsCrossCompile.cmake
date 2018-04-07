@@ -27,8 +27,10 @@ if (NOT DEFINED ARCH)
 endif()
 
 # MSVC Includes and Libs:
-# currently I am mounting MSVC from Parallels - TODO: allow configuring the path to MSVC.
-set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)" )
+# currently I am mounting MSVC from Parallels - override with -DPROGRAMFILES=
+if (NOT DEFINED PROGRAMFILES)
+   set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)" )
+endif()
 IF(NOT EXISTS "${PROGRAMFILES}")
    message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    ${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\n\n" )
 endif()
@@ -98,11 +100,16 @@ else()
   set(CMAKE_CL_NOLOGO "/nologo")
 endif()
 
-# compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
-set( SYSFLAGS "-target ${triple} -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
-# compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
-#set( SYSFLAGS "/imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+# set to TRUE to use clang-cl, or FALSE to use clang -target, both work...
+set( USE_CL TRUE )
 
+if (NOT USE_CL)
+# compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
+set( SYSFLAGS "-target ${triple} -DWIN32 -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+else()
+# compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
+set( SYSFLAGS "/MT /DWIN32 /imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+endif()
 
 foreach(lang C CXX)
    set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
@@ -112,6 +119,7 @@ foreach(lang C CXX)
 endforeach()
 #set( CMAKE_SHARED_LINKER_FLAGS "" )
 
+if (NOT USE_CL)
 # compiler clang/clang++
 set( CMAKE_C_COMPILER "/usr/local/opt/llvm/bin/clang" CACHE STRING "" FORCE)
 set( CMAKE_CXX_COMPILER "/usr/local/opt/llvm/bin/clang++" CACHE STRING "" FORCE)
@@ -121,15 +129,17 @@ set( C_COMPILE_OBJECT_FLAG -c )
 set( CXX_COMPILE_OBJECT_FLAG -c )
 set( C_COMPILE_OBJECT_SOURCE_FLAG "")
 set( CXX_COMPILE_OBJECT_SOURCE_FLAG "")
+else()
 # compiler clang-cl
-#set( CMAKE_${lang}_COMPILER "/usr/local/opt/llvm/bin/clang-cl" CACHE STRING "" FORCE)
-#set( C_COMPILE_OBJECT_OUTPUT_FLAG /o )
-#set( CXX_COMPILE_OBJECT_OUTPUT_FLAG /o )
-#set( C_COMPILE_OBJECT_FLAG /c )
-#set( CXX_COMPILE_OBJECT_FLAG /c )
-#set( C_COMPILE_OBJECT_SOURCE_FLAG /Tc)
-#set( CXX_COMPILE_OBJECT_SOURCE_FLAG /Tp)
-
+set( CMAKE_C_COMPILER "/usr/local/opt/llvm/bin/clang-cl" CACHE STRING "" FORCE)
+set( CMAKE_CXX_COMPILER "/usr/local/opt/llvm/bin/clang-cl" CACHE STRING "" FORCE)
+set( C_COMPILE_OBJECT_OUTPUT_FLAG /o )
+set( CXX_COMPILE_OBJECT_OUTPUT_FLAG /o )
+set( C_COMPILE_OBJECT_FLAG /c )
+set( CXX_COMPILE_OBJECT_FLAG /c )
+set( C_COMPILE_OBJECT_SOURCE_FLAG /Tc)
+set( CXX_COMPILE_OBJECT_SOURCE_FLAG /Tp)
+endif()
 
 #/MACHINE:X64|X86
 
@@ -180,8 +190,8 @@ foreach(lang C CXX)
    endif()
 
    set(CMAKE_${lang}_COMPILE_OBJECT "<CMAKE_${lang}_COMPILER> ${CMAKE_INCLUDE_SYSTEM_FLAG_${lang}} <DEFINES> <FLAGS> ${${lang}_COMPILE_OBJECT_FLAG} ${${lang}_COMPILE_OBJECT_SOURCE_FLAG}<SOURCE> ${${lang}_COMPILE_OBJECT_OUTPUT_FLAG}<OBJECT>  " CACHE STRING "" FORCE)
-   set(CMAKE_${lang}_LINK_EXECUTABLE "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <LINK_FLAGS> /subsystem:console libcmt.lib <LINK_LIBRARIES> /out:<TARGET>${CMAKE_END_TEMP_FILE}")
-   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> libcmt.lib <LINK_LIBRARIES> /out:<TARGET> ${CMAKE_END_TEMP_FILE}")
+   set(CMAKE_${lang}_LINK_EXECUTABLE "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <LINK_FLAGS> /subsystem:console libcmt.lib /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET>${CMAKE_END_TEMP_FILE}")
+   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> libcmt.lib /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET> ${CMAKE_END_TEMP_FILE}")
    set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
    set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "${CMAKE_LIB} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <LINK_FLAGS> ${CMAKE_CL_NOLOGO} <OBJECTS> /out:<TARGET>")
 
@@ -242,10 +252,15 @@ SET(CMAKE_LINK_LIBRARY_FLAG      ""             CACHE STRING "Linker's Libray fl
 SET(CMAKE_LINK_LIBRARY_SUFFIX    ".lib"         CACHE STRING "Library extension" FORCE)
 set(CMAKE_FIND_LIBRARY_PREFIXES "")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
-set(CMAKE_C_OUTPUT_EXTENSION     ".obj"         CACHE STRING "C compiler object extension")
-set(CMAKE_CXX_OUTPUT_EXTENSION   ".obj"         CACHE STRING "C++ compiler object extension")
+set(CMAKE_C_OUTPUT_EXTENSION     ".obj"         CACHE STRING "C compiler object extension" FORCE)
+set(CMAKE_CXX_OUTPUT_EXTENSION   ".obj"         CACHE STRING "C++ compiler object extension" FORCE)
 SET(CMAKE_LIBRARY_PATH_FLAG      "/libpath:"    CACHE STRING "Linker's Library path flag" FORCE)
 set(CMAKE_DL_LIBS "")
+if (NOT USE_CL)
+   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++11" CACHE STRING "option to enable c++ 11" FORCE)
+else()
+   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "" CACHE STRING "option to enable c++ 11" FORCE)
+endif()
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)

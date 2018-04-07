@@ -4,6 +4,7 @@
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 
 SET(SRC ${CMAKE_CURRENT_SOURCE_DIR}/../makefile_example)
+SET(ARCH ${CMAKE_LIBRARY_ARCHITECTURE})
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10.0 FATAL_ERROR)
 SET(CMAKE_CXX_STANDARD 11)
@@ -11,54 +12,40 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 PROJECT(crosscompilewindows)
 
+
 INCLUDE_DIRECTORIES(.)
 
 
 # executable tests
-ADD_EXECUTABLE(mainCPP-x64 ${SRC}/main.cpp)
-ADD_EXECUTABLE(mainC-x64 ${SRC}/main.c)
-ADD_EXECUTABLE(mainCPP-x32 ${SRC}/main.cpp)
-ADD_EXECUTABLE(mainC-x32 ${SRC}/main.c)
+ADD_EXECUTABLE(mainCPP-${ARCH} ${SRC}/main.cpp)
+ADD_EXECUTABLE(mainC-${ARCH} ${SRC}/main.c)
 if (WIN32)
-   set_property( TARGET mainCPP-x64 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   set_property( TARGET mainC-x64 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   set_property( TARGET mainCPP-x32 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   set_property( TARGET mainC-x32 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
+   set_property( TARGET mainCPP-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
+   set_property( TARGET mainC-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
 
 
 # static library tests
-add_library( lib-x64 STATIC ${SRC}/lib.cpp )
-ADD_EXECUTABLE(libmain-x64 ${SRC}/libmain.cpp)
-TARGET_LINK_LIBRARIES(libmain-x64 lib-x64)
-
-add_library( lib-x86 STATIC ${SRC}/lib.cpp )
-ADD_EXECUTABLE(libmain-x86 ${SRC}/libmain.cpp)
-TARGET_LINK_LIBRARIES(libmain-x86 lib-x86)
+add_library( lib-${ARCH} STATIC ${SRC}/lib.cpp )
+ADD_EXECUTABLE(libmain-${ARCH} ${SRC}/libmain.cpp)
+TARGET_LINK_LIBRARIES(libmain-${ARCH} lib-${ARCH})
 
 
 # dynamic link library tests
-add_library( dll-x64 SHARED ${SRC}/dll.cpp )
-ADD_EXECUTABLE(dllmain-x64 ${SRC}/dllmain.cpp)
-TARGET_LINK_LIBRARIES(dllmain-x64 dll-x64)
-
-add_library( dll-x86 SHARED ${SRC}/dll.cpp )
-ADD_EXECUTABLE(dllmain-x86 ${SRC}/dllmain.cpp)
-TARGET_LINK_LIBRARIES(dllmain-x86 dll-x86)
+add_library( dll-${ARCH} SHARED ${SRC}/dll.cpp )
+ADD_EXECUTABLE(dllmain-${ARCH} ${SRC}/dllmain.cpp)
+TARGET_LINK_LIBRARIES(dllmain-${ARCH} dll-${ARCH})
 
 if (WIN32)
-   set_property( TARGET dllmain-x64 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   set_property( TARGET dllmain-x86 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
+   set_property( TARGET dllmain-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
 
 
 # dynamic load library (plugin) tests
-add_library( plugin-x86 MODULE ${SRC}/dll.cpp )
-add_library( plugin-x64 MODULE ${SRC}/dll.cpp )
-ADD_EXECUTABLE(pluginmain-x64 ${SRC}/plugin.cpp )
-ADD_EXECUTABLE(pluginmain-x86 ${SRC}/plugin.cpp )
+add_library( plugin-${ARCH} MODULE ${SRC}/dll.cpp )
+ADD_EXECUTABLE(pluginmain-${ARCH} ${SRC}/plugin.cpp )
 if (WIN32)
-   set_property( TARGET pluginmain-x64 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   set_property( TARGET pluginmain-x86 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
+   set_property( TARGET pluginmain-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
+
 

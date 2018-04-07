@@ -1,0 +1,36 @@
+
+# Toolchain for 32bit windows builds
+# - on MacOSX we will crosscompile for Windows using MSVC directories
+#   cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Windows32.cmake
+#
+# - on Windows will generate a .sln project/solution for visual studio
+#   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
+#   cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Windows32.cmake -G "Visual Studio 14" ..
+if (APPLE)
+   #message( "We're going to use LLVM to cross compile to Windows for you" )
+   set( CMAKE_SYSTEM_NAME LlvmWindowsCrossCompile )
+   set( CMAKE_C_FLAGS_INIT "-m32 /MT" CACHE STRING "" FORCE)
+   set( CMAKE_CXX_FLAGS_INIT "-m32 /MT" CACHE STRING "" FORCE)
+   set( CMAKE_EXE_LINKER_FLAGS_INIT ""  CACHE STRING "" FORCE)
+   set( CMAKE_MODULE_LINKER_FLAGS_INIT ""  CACHE STRING "" FORCE)
+   set( CMAKE_SHARED_LINKER_FLAGS_INIT ""  CACHE STRING "" FORCE)
+   set( CMAKE_ASM-ATT_FLAGS_INIT -m32 CACHE STRING "" FORCE)
+   set( CMAKE_LIBRARY_ARCHITECTURE x86  CACHE STRING "" FORCE)
+   set( ARCH x86  CACHE STRING "" FORCE)
+else()
+   # Sometimes you may need to add also -T <toolset-name> or -A <platform-name> option:
+   #message( "Looks like you're actually on Windows, sure I know how to do that" )
+   if (NOT DEFINED CMAKE_GENERATOR)
+      set( CMAKE_GENERATOR "Visual Studio 14" )
+   endif()
+   #SET( CMAKE_EXE_LINKER_FLAGS_INIT "/NODEFAULTLIB:MSVCRT" CACHE STRING "" FORCE)
+   #SET( CMAKE_MODULE_LINKER_FLAGS_INIT "/NODEFAULTLIB:MSVCRT" CACHE STRING "" FORCE)
+   #SET( CMAKE_SHARED_LINKER_FLAGS "/NODEFAULTLIB:MSVCRT" CACHE STRING "" FORCE)
+   set( CMAKE_BUILD_TYPE Release )
+   set( CMAKE_LIBRARY_ARCHITECTURE x86  CACHE STRING "" FORCE)
+   set( ARCH x86  CACHE STRING "" FORCE)
+endif()
+
+include("MSVCRuntime")
+configure_msvc_runtime()
+

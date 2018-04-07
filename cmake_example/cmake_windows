@@ -1,0 +1,21 @@
+
+rm -rf build-wincross32 && mkdir -p build-wincross32 && cd build-wincross32
+
+cmake $@ -DCMAKE_TOOLCHAIN_FILE=Modules/Windows32.cmake .. && make
+
+cp ../../makefile_example/test.bat .
+
+ls
+cd -
+
+
+rm -rf build-wincross64 && mkdir -p build-wincross64 && cd build-wincross64
+
+cmake $@ -DCMAKE_TOOLCHAIN_FILE=Modules/Windows64.cmake .. && make
+
+cp ../../makefile_example/test.bat .
+
+ls
+cd -
+
+

@@ -1,7 +1,11 @@
 
 extern "C"
 {
-   extern __declspec(dllimport) void vroooom();
+   extern
+#ifdef WINDOWS
+   __declspec(dllimport)
+#endif
+   void vroooom();
 }
 
 int main() {

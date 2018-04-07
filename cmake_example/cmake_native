@@ -1,9 +1,15 @@
 
-rm -rf build
-mkdir -p build
-cd build
+rm -rf build32 && mkdir -p build32 && cd build32
 
-cmake $@ .. && make
+cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Native32.cmake .. && make
+
+ls
+cd -
+
+
+rm -rf build64 && mkdir -p build64 && cd build64
+
+cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Native64.cmake .. && make
 
 ls
 cd -
