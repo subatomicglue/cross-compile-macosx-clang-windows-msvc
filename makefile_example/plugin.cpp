@@ -9,13 +9,13 @@ int main()
    HMODULE module;
    if (sizeof(size_t) == 8)
    {
-      printf( "Loading DLL plugin 'dll-x64.dll':\n" );
-      module = LoadLibrary("dll-x64.dll");
+      printf( "Loading DLL plugin 'plugin-x64.dll':\n" );
+      module = LoadLibrary("plugin-x64.dll");
    }
    else
    {
-      printf( "Loading DLL plugin 'dll-x86.dll':\n" );
-      module = LoadLibrary("dll-x86.dll");
+      printf( "Loading DLL plugin 'plugin-x86.dll':\n" );
+      module = LoadLibrary("plugin-x86.dll");
    }
 
    if (module == 0)

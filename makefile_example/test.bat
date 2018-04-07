@@ -13,6 +13,6 @@ libmain-x64.exe
 libmain-x86.exe
 dllmain-x64.exe
 dllmain-x86.exe
-plugin-x64.exe
-plugin-x86.exe
+pluginmain-x64.exe
+pluginmain-x86.exe
 

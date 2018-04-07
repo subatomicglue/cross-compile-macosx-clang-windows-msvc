@@ -160,9 +160,13 @@ dll:
 	@echo "\ndynamic link DLL into a 64bit Executable (.exe)"
 	$(CPP64) $(DEFINES) -c dllmain.cpp -o dllmain-x64.o
 	$(LINK64) libucrt.lib libcmt.lib dll-x64.lib /subsystem:console /out:dllmain-x64.exe dllmain-x64.o
+	@echo "\ncreate 64bit C++ Plugin DLL (.dll)"
+	$(CPP64) $(DEFINES) -c dll.cpp -o plugin-x64.o
+	$(LINK64) libucrt.lib libcmt.lib /dll /out:plugin-x64.dll plugin-x64.o
+	rm plugin-x64.lib
 	@echo "\ndynamic load DLL from a 64bit standalone Executable (.exe)"
-	$(CPP64) $(DEFINES) -c plugin.cpp -o plugin-x64.o
-	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:plugin-x64.exe plugin-x64.o
+	$(CPP64) $(DEFINES) -c plugin.cpp -o pluginmain-x64.o
+	$(LINK64) libucrt.lib libcmt.lib /subsystem:console /out:pluginmain-x64.exe pluginmain-x64.o
 	@echo "\n==================="
 	@echo "create 32bit C++ DLL (.lib/.dll)"
 	$(CPP32) $(DEFINES) -c dll.cpp -o dll-x86.o
@@ -170,9 +174,13 @@ dll:
 	@echo "\ndynamic link DLL into a 32bit Executable (.exe)"
 	$(CPP32) $(DEFINES) -c dllmain.cpp -o dllmain-x86.o
 	$(LINK32) libucrt.lib libcmt.lib dll-x86.lib /subsystem:console /out:dllmain-x86.exe dllmain-x86.o
+	@echo "\ncreate 32bit C++ Plugin DLL (.dll)"
+	$(CPP32) $(DEFINES) -c dll.cpp -o plugin-x86.o
+	$(LINK32) libucrt.lib libcmt.lib /dll /out:plugin-x86.dll plugin-x86.o
+	rm plugin-x86.lib
 	@echo "\ndynamic load DLL from a 32bit standalone Executable (.exe)"
-	$(CPP32) $(DEFINES) -c plugin.cpp -o plugin-x86.o
-	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:plugin-x86.exe plugin-x86.o
+	$(CPP32) $(DEFINES) -c plugin.cpp -o pluginmain-x86.o
+	$(LINK32) libucrt.lib libcmt.lib /subsystem:console /out:pluginmain-x86.exe pluginmain-x86.o
 
 
 

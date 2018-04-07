@@ -3,7 +3,9 @@ rm -rf build-crosswindows
 mkdir -p build-crosswindows
 cd build-crosswindows
 
-cmake $@ -DCMAKE_SYSTEM_NAME=LlvmWindowsCrossCompile .. && make -j 10
+cmake $@ -DCMAKE_SYSTEM_NAME=LlvmWindowsCrossCompile .. && make
+
+cp ../../makefile_example/test.bat .
 
 ls
 cd -

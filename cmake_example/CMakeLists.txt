@@ -28,21 +28,21 @@ endif()
 
 
 # static library tests
-add_library( lib-x64 ${SRC}/lib.cpp )
+add_library( lib-x64 STATIC ${SRC}/lib.cpp )
 ADD_EXECUTABLE(libmain-x64 ${SRC}/libmain.cpp)
 TARGET_LINK_LIBRARIES(libmain-x64 lib-x64)
 
-add_library( lib-x86 ${SRC}/lib.cpp )
+add_library( lib-x86 STATIC ${SRC}/lib.cpp )
 ADD_EXECUTABLE(libmain-x86 ${SRC}/libmain.cpp)
 TARGET_LINK_LIBRARIES(libmain-x86 lib-x86)
 
 
 # dynamic link library tests
-add_library( dll-x64 ${SRC}/dll.cpp )
+add_library( dll-x64 SHARED ${SRC}/dll.cpp )
 ADD_EXECUTABLE(dllmain-x64 ${SRC}/dllmain.cpp)
 TARGET_LINK_LIBRARIES(dllmain-x64 dll-x64)
 
-add_library( dll-x86 ${SRC}/dll.cpp )
+add_library( dll-x86 SHARED ${SRC}/dll.cpp )
 ADD_EXECUTABLE(dllmain-x86 ${SRC}/dllmain.cpp)
 TARGET_LINK_LIBRARIES(dllmain-x86 dll-x86)
 
@@ -53,10 +53,12 @@ endif()
 
 
 # dynamic load library (plugin) tests
-ADD_EXECUTABLE(plugin-x64 ${SRC}/plugin.cpp)
-ADD_EXECUTABLE(plugin-x86 ${SRC}/plugin.cpp)
+add_library( plugin-x86 MODULE ${SRC}/dll.cpp )
+add_library( plugin-x64 MODULE ${SRC}/dll.cpp )
+ADD_EXECUTABLE(pluginmain-x64 ${SRC}/plugin.cpp )
+ADD_EXECUTABLE(pluginmain-x86 ${SRC}/plugin.cpp )
 if (WIN32)
-   set_property( TARGET plugin-x64 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   set_property( TARGET plugin-x86 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
+   set_property( TARGET pluginmain-x64 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
+   set_property( TARGET pluginmain-x86 APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
 
