@@ -27,7 +27,7 @@ if (NOT DEFINED ARCH)
 endif()
 
 # MSVC Includes and Libs:
-# currently I am mounting MSVC from Parallels - override with -DPROGRAMFILES=
+# currently I am mounting MSVC from Parallels - override with  "cmake -DPROGRAMFILES=/whatever/"
 if (NOT DEFINED PROGRAMFILES)
    set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)" )
 endif()
@@ -35,6 +35,15 @@ IF(NOT EXISTS "${PROGRAMFILES}")
    message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    ${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\n\n" )
 endif()
 
+# LLVM binary location
+if (NOT DEFINED LLVM_PATH)
+   set( LLVM_PATH "/usr/local/opt/llvm/bin" )
+endif()
+IF(NOT EXISTS "${LLVM_PATH}")
+   message(FATAL_ERROR "\n\nERROR: LLVM DIRECTORY ${LLVM_PATH} DOESNT EXIST:\n    ${LLVM_PATH}\nLocation doesn't exist.  Try `brew install llvm`.\n\n" )
+endif()
+
+# MSVC location:
 # http://marcofoco.com/microsoft-visual-c-version-map/
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC") # 2017
    set( _MSC_VER 1910 )
@@ -102,61 +111,67 @@ endif()
 
 # set to TRUE to use clang-cl, or FALSE to use clang -target, both work...
 set( USE_CL TRUE )
+# set to TRUE to use lld-link, or FALSE to use lld -flavor link, both work...
+set( USE_LINK TRUE )
 
 if (NOT USE_CL)
-# compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
-set( SYSFLAGS "-target ${triple} -DWIN32 -D_WINDOWS -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+   # compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
+   set( SYSFLAGS "-target ${triple} -DWIN32 -D_WINDOWS -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
 else()
-# compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
-set( SYSFLAGS "/DWIN32 /D_WINDOWS /imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+   # compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
+   set( SYSFLAGS "/DWIN32 /D_WINDOWS /imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
 endif()
 
 foreach(lang C CXX)
-   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
-   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
-   set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "${SYSFLAGS}" CACHE STRING "" FORCE)
-   set( CMAKE_LIB_SYSTEM_PATHS_${lang} "/libpath:\"${MSVC_LIB}\" /libpath:\"${UniversalCRT_Lib}\" /libpath:\"${WINSDK_LIB}\"" CACHE STRING "" FORCE)
+   set( CMAKE_${lang}_COMPILE_OPTIONS_PIC "" )
+   set( CMAKE_SHARED_LIBRARY_${lang}_FLAGS "" )
+   set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "${SYSFLAGS}" CACHE STRING "" FORCE )
+   set( CMAKE_LIB_SYSTEM_PATHS_${lang} "/libpath:\"${MSVC_LIB}\" /libpath:\"${UniversalCRT_Lib}\" /libpath:\"${WINSDK_LIB}\"" CACHE STRING "" FORCE )
 endforeach()
 #set( CMAKE_SHARED_LINKER_FLAGS "" )
 
 if (NOT USE_CL)
-# compiler clang/clang++
-set( CMAKE_C_COMPILER "/usr/local/opt/llvm/bin/clang" CACHE STRING "" FORCE)
-set( CMAKE_CXX_COMPILER "/usr/local/opt/llvm/bin/clang++" CACHE STRING "" FORCE)
-set( C_COMPILE_OBJECT_OUTPUT_FLAG -o )
-set( CXX_COMPILE_OBJECT_OUTPUT_FLAG -o )
-set( C_COMPILE_OBJECT_FLAG -c )
-set( CXX_COMPILE_OBJECT_FLAG -c )
-set( C_COMPILE_OBJECT_SOURCE_FLAG "")
-set( CXX_COMPILE_OBJECT_SOURCE_FLAG "")
+   # compiler clang/clang++
+   set( CMAKE_C_COMPILER "${LLVM_PATH}/clang" CACHE STRING "" FORCE)
+   set( CMAKE_CXX_COMPILER "${LLVM_PATH}/clang++" CACHE STRING "" FORCE)
+   set( C_COMPILE_OBJECT_OUTPUT_FLAG -o )
+   set( CXX_COMPILE_OBJECT_OUTPUT_FLAG -o )
+   set( C_COMPILE_OBJECT_FLAG -c )
+   set( CXX_COMPILE_OBJECT_FLAG -c )
+   set( C_COMPILE_OBJECT_SOURCE_FLAG "")
+   set( CXX_COMPILE_OBJECT_SOURCE_FLAG "")
 else()
-# compiler clang-cl
-set( CMAKE_C_COMPILER "/usr/local/opt/llvm/bin/clang-cl" CACHE STRING "" FORCE)
-set( CMAKE_CXX_COMPILER "/usr/local/opt/llvm/bin/clang-cl" CACHE STRING "" FORCE)
-set( C_COMPILE_OBJECT_OUTPUT_FLAG /o )
-set( CXX_COMPILE_OBJECT_OUTPUT_FLAG /o )
-set( C_COMPILE_OBJECT_FLAG /c )
-set( CXX_COMPILE_OBJECT_FLAG /c )
-set( C_COMPILE_OBJECT_SOURCE_FLAG /Tc)
-set( CXX_COMPILE_OBJECT_SOURCE_FLAG /Tp)
+   # compiler clang-cl
+   set( CMAKE_C_COMPILER "${LLVM_PATH}/clang-cl" CACHE STRING "" FORCE)
+   set( CMAKE_CXX_COMPILER "${LLVM_PATH}/clang-cl" CACHE STRING "" FORCE)
+   set( C_COMPILE_OBJECT_OUTPUT_FLAG /o )
+   set( CXX_COMPILE_OBJECT_OUTPUT_FLAG /o )
+   set( C_COMPILE_OBJECT_FLAG /c )
+   set( CXX_COMPILE_OBJECT_FLAG /c )
+   set( C_COMPILE_OBJECT_SOURCE_FLAG /Tc)
+   set( CXX_COMPILE_OBJECT_SOURCE_FLAG /Tp)
 endif()
 
+# something we _could_ have our linker do...  though link.exe infers this from the .obj files... so...  we can skip it.
 #/MACHINE:X64|X86
 
-# executable and DLL linker lld -flavor link (llvm's version of MSVC's link.exe)
-set( CMAKE_LINKER "/usr/local/opt/llvm/bin/lld" CACHE STRING "" FORCE)
-foreach(lang C CXX)
-   set( CMAKE_${lang}_SYSTEM_LINK_FLAGS "-flavor link" CACHE STRING "" FORCE)
-endforeach()
-
-# executable and DLL linker lld-link (llvm's version of MSVC's link.exe)
-#set( CMAKE_LINKER "/usr/local/opt/llvm/bin/lld-link" CACHE STRING "" FORCE)
-#foreach(lang C CXX)
-#  set( CMAKE_${lang}_LINK_FLAGS "" CACHE STRING "" FORCE)
-#endforeach()
+# executable and DLL linker:
+if (NOT USE_LINK)
+   # lld -flavor link (llvm's version of MSVC's link.exe)
+   set( CMAKE_LINKER "${LLVM_PATH}/lld" CACHE STRING "" FORCE)
+   foreach(lang C CXX)
+      set( CMAKE_${lang}_SYSTEM_LINK_FLAGS "-flavor link" CACHE STRING "" FORCE)
+   endforeach()
+else()
+   # lld-link (llvm's version of MSVC's link.exe)
+   set( CMAKE_LINKER "${LLVM_PATH}/lld-link" CACHE STRING "" FORCE)
+   foreach(lang C CXX)
+   set( CMAKE_${lang}_LINK_FLAGS "" CACHE STRING "" FORCE)
+   endforeach()
+endif()
 
 # library linker - llvm-lib (llvm's version of MSVC's lib.exe)
-set( CMAKE_LIB "/usr/local/opt/llvm/bin/llvm-lib" CACHE STRING "" FORCE)
+set( CMAKE_LIB "${LLVM_PATH}/llvm-lib" CACHE STRING "" FORCE)
 
 
 #set(CMAKE_C_STANDARD_LIBRARIES_INIT "libcmt.lib")
@@ -190,12 +205,12 @@ foreach(lang C CXX)
    endif()
 
    set(CMAKE_${lang}_COMPILE_OBJECT "<CMAKE_${lang}_COMPILER> ${CMAKE_INCLUDE_SYSTEM_FLAG_${lang}} <DEFINES> <FLAGS> ${${lang}_COMPILE_OBJECT_FLAG} ${${lang}_COMPILE_OBJECT_SOURCE_FLAG}<SOURCE> ${${lang}_COMPILE_OBJECT_OUTPUT_FLAG}<OBJECT>  " CACHE STRING "" FORCE)
-   set(CMAKE_${lang}_LINK_EXECUTABLE "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <LINK_FLAGS> /subsystem:console libcmt.lib /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET>${CMAKE_END_TEMP_FILE}")
-   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> libcmt.lib /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET> ${CMAKE_END_TEMP_FILE}")
+   set(CMAKE_${lang}_LINK_EXECUTABLE "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <LINK_FLAGS> /subsystem:console /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET>${CMAKE_END_TEMP_FILE}")
+   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET> ${CMAKE_END_TEMP_FILE}")
    set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
    set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "${CMAKE_LIB} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <LINK_FLAGS> ${CMAKE_CL_NOLOGO} <OBJECTS> /out:<TARGET>")
 
-   # verbose output:
+   # verbose output (prepend an echo $cmd to each above command):
    if (VERBOSE_OUTPUT)
       set(CMAKE_${lang}_COMPILE_OBJECT "echo OBJ: ${CMAKE_${lang}_COMPILE_OBJECT}; ${CMAKE_${lang}_COMPILE_OBJECT}" )
       set(CMAKE_${lang}_LINK_EXECUTABLE "echo EXE: ${CMAKE_${lang}_LINK_EXECUTABLE}; ${CMAKE_${lang}_LINK_EXECUTABLE}" )
@@ -205,6 +220,7 @@ foreach(lang C CXX)
       set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
    endif()
 
+   # setup flags for release vs debug
    if("x${lang}" STREQUAL "xC" OR
       "x${lang}" STREQUAL "xCXX")
     if(CMAKE_${lang}_COMPILER MATCHES "clang")
@@ -225,6 +241,8 @@ foreach(lang C CXX)
   endif()
 endforeach()
 
+# compile rc files:
+
 #if(NOT CMAKE_RC_COMPILER_INIT)
 #   set(CMAKE_RC_COMPILER_INIT rc)
 #endif()
@@ -237,8 +255,7 @@ endforeach()
 
 #enable_language(RC)
 
-# you can set lib paths with , and libs with cmt (which will expand to libcmt.lib)
-# PROBLEM: makes no difference, every one gets overridden by cmake/Modules/CMakeGenericSystem.cmake during PROJECT() in the CMakeLists
+# set up common flags, prefixes, suffixes:
 set(CMAKE_STATIC_LIBRARY_PREFIX  ""             CACHE STRING "Library prefix" FORCE)
 SET(CMAKE_STATIC_LIBRARY_SUFFIX  ".lib"         CACHE STRING "Static library extension" FORCE)
 set(CMAKE_SHARED_LIBRARY_PREFIX  ""             CACHE STRING "Library prefix" FORCE)
@@ -262,6 +279,7 @@ else()
    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "" CACHE STRING "option to enable c++ 11" FORCE)
 endif()
 
+# some additional crypto-teric cmake stuff, for your pleasure:
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
