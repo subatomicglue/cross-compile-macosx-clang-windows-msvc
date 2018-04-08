@@ -6,7 +6,7 @@
 ARCH32=x86
 ARCH64=x64
 ARCH=$(ARCH64) # set to either one, and the right stuff will get chosen
-DEFINES=-std=c++11 #-fno-rtti -fno-exceptions -D_HAS_EXCEPTIONS=0 -D_ITERATOR_DEBUG_LEVEL=0
+DEFINES=-DWIN32 -std=c++11 #-fno-rtti -fno-exceptions -D_HAS_EXCEPTIONS=0 -D_ITERATOR_DEBUG_LEVEL=0
 _MSC_VER=1900 # 1800=VC2013, 1900=VC2015, 1910=VC2017 / others: https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B
 PROGRAMFILES=/Volumes/[C] Windows 10/Program Files (x86)
 LLVM=/usr/local/opt/llvm/bin
