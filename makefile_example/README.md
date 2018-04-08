@@ -139,4 +139,5 @@ sizeof(size_t): 4
 - dumpbin shows all symbols in a DLL
    - `"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\dumpbin.exe" /exports dll-x86.dll`
 
+See also: [looking for a cmake version?](../cmake_example/README.md)
 
