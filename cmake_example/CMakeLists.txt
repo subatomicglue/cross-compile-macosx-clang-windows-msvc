@@ -1,6 +1,27 @@
-
-# to cross compile for Windows call:
+# to build for the native host (works on windows too) call:
+# for 32bit:
+#  cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Native32.cmake
+# for 64bit:
+#  cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Native64.cmake
+#
+# to cross compile to Windows (from Mac/Lin/etc.) call:
+# for 32bit:
+#  cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Windows32.cmake
+# for 64bit:
+#  cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Windows64.cmake
+#
+# to natively build on Windows, but customize version of MSVC, call:
+# for 32bit:
+#  cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Native32.cmake -G "Visual Studio 14"
+#  cmake --build . --config Release        # build on command line without launching MSVC
+# for 64bit:
+#  cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Native64.cmake -G "Visual Studio 14 Win64"
+#  cmake --build . --config Release        # build on command line without launching MSVC
+#
+# More ways to cross compile:
+#    You can let LLVM compile using defaults
 #  cmake -DCMAKE_SYSTEM_NAME=LlvmWindowsCrossCompile
+#    Or use CMAKE_SYSTEM_NAME to make your own toolchain file (see Modules/Windows??.cmake for ex)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 
 SET(SRC ${CMAKE_CURRENT_SOURCE_DIR}/../makefile_example)
