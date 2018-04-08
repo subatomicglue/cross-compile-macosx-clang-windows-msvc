@@ -7,7 +7,7 @@ There are *Platform* and *Toolchain* files [under Modules](Modules/)) for compil
 
 See also: [looking for a Makefile version?](../makefile_example/README.md)
 
-Included are examples for:
+Included are both 32 and 64bit examples for:
 - `.exe`
 - `.lib` (static linked)
 - `.dll` (dynamic linked)

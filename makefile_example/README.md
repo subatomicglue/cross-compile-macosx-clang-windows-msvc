@@ -5,7 +5,7 @@ Here is an example HOWTO to cross compile C/C++ from MacOSX terminal to Windows 
 
 See also: [looking for a cmake version?](../cmake_example/README.md)
 
-Included are examples for:
+Included are both 32 and 64bit examples for:
 - `.exe`
 - `.lib` (static linked)
 - `.dll` (dynamic linked)
