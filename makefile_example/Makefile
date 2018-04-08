@@ -8,38 +8,43 @@ ARCH64=x64
 ARCH=$(ARCH64) # set to either one, and the right stuff will get chosen
 DEFINES=-DWIN32 -std=c++11 #-fno-rtti -fno-exceptions -D_HAS_EXCEPTIONS=0 -D_ITERATOR_DEBUG_LEVEL=0
 _MSC_VER=1900 # 1800=VC2013, 1900=VC2015, 1910=VC2017 / others: https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B
-PROGRAMFILES=/Volumes/[C] Windows 10/Program Files (x86)
-LLVM=/usr/local/opt/llvm/bin
 
-# compiler system paths
-UniversalCRT_IncludePath="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
-UniversalCRT_Lib="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH)"
-MSVC_INCLUDE="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
-MSVC_LIB="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH),x64),/amd64,)"
-WINSDK_INC="$(PROGRAMFILES)/Windows Kits/8.1/Include/um"
-WINSDK_SHARED__INC="$(PROGRAMFILES)/Windows Kits/8.1/Include/shared"
-WINSDK_LIB="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH)"
+# base locations of MSVC toolchain:
+PROGRAMFILES_PATH=/Volumes/[C] Windows 10/Program Files (x86)
+WINDOWS_KITS10_PATH=$(PROGRAMFILES_PATH)/Windows Kits/10
+WINDOWS_KITS81_PATH=$(PROGRAMFILES_PATH)/Windows Kits/8.1
+MSVC_PATH=$(PROGRAMFILES_PATH)/Microsoft Visual Studio 14.0/VC
+LLVM_PATH=/usr/local/opt/llvm/bin
 
-UniversalCRT_IncludePath32="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
-UniversalCRT_Lib32="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH32)"
-MSVC_INCLUDE32="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
-MSVC_LIB32="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH32),x64),/amd64,)"
-WINSDK_INC32="$(PROGRAMFILES)/Windows Kits/8.1/Include/um"
-WINSDK_SHARED_INC32="$(PROGRAMFILES)/Windows Kits/8.1/Include/shared"
-WINSDK_LIB32="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH32)"
+# MSVC system INCLUDE and LIB paths
+UniversalCRT_IncludePath="$(WINDOWS_KITS10_PATH)/Include/10.0.10150.0/ucrt"
+UniversalCRT_Lib="$(WINDOWS_KITS10_PATH)/Lib/10.0.10150.0/ucrt/$(ARCH)"
+MSVC_INCLUDE="$(MSVC_PATH)/include"
+MSVC_LIB="$(MSVC_PATH)/lib$(if $(filter $(ARCH),x64),/amd64,)"
+WINSDK_INC="$(WINDOWS_KITS81_PATH)/Include/um"
+WINSDK_SHARED__INC="$(WINDOWS_KITS81_PATH)/Include/shared"
+WINSDK_LIB="$(WINDOWS_KITS81_PATH)/Lib/winv6.3/um/$(ARCH)"
 
-UniversalCRT_IncludePath64="$(PROGRAMFILES)/Windows Kits/10/Include/10.0.10150.0/ucrt"
-UniversalCRT_Lib64="$(PROGRAMFILES)/Windows Kits/10/Lib/10.0.10150.0/ucrt/$(ARCH64)"
-MSVC_INCLUDE64="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/include"
-MSVC_LIB64="$(PROGRAMFILES)/Microsoft Visual Studio 14.0/VC/lib$(if $(filter $(ARCH64),x64),/amd64,)"
-WINSDK_INC64="$(PROGRAMFILES)/Windows Kits/8.1/Include/um"
-WINSDK_SHARED_INC64="$(PROGRAMFILES)/Windows Kits/8.1/Include/shared"
-WINSDK_LIB64="$(PROGRAMFILES)/Windows Kits/8.1/Lib/winv6.3/um/$(ARCH64)"
+UniversalCRT_IncludePath32="$(WINDOWS_KITS10_PATH)/Include/10.0.10150.0/ucrt"
+UniversalCRT_Lib32="$(WINDOWS_KITS10_PATH)/Lib/10.0.10150.0/ucrt/$(ARCH32)"
+MSVC_INCLUDE32="$(MSVC_PATH)/include"
+MSVC_LIB32="$(MSVC_PATH)/lib$(if $(filter $(ARCH32),x64),/amd64,)"
+WINSDK_INC32="$(WINDOWS_KITS81_PATH)/Include/um"
+WINSDK_SHARED_INC32="$(WINDOWS_KITS81_PATH)/Include/shared"
+WINSDK_LIB32="$(WINDOWS_KITS81_PATH)/Lib/winv6.3/um/$(ARCH32)"
+
+UniversalCRT_IncludePath64="$(WINDOWS_KITS10_PATH)/Include/10.0.10150.0/ucrt"
+UniversalCRT_Lib64="$(WINDOWS_KITS10_PATH)/Lib/10.0.10150.0/ucrt/$(ARCH64)"
+MSVC_INCLUDE64="$(MSVC_PATH)/include"
+MSVC_LIB64="$(MSVC_PATH)/lib$(if $(filter $(ARCH64),x64),/amd64,)"
+WINSDK_INC64="$(WINDOWS_KITS81_PATH)/Include/um"
+WINSDK_SHARED_INC64="$(WINDOWS_KITS81_PATH)/Include/shared"
+WINSDK_LIB64="$(WINDOWS_KITS81_PATH)/Lib/winv6.3/um/$(ARCH64)"
 
 # options seem to be 64bit: x86_64-pc-windows-msvc, i686-pc-windows-msvc;  or 32bit: i386-pc-win32
 TARGET=-target $(if $(filter $(ARCH),x64),x86_64-pc-windows-msvc,i386-pc-win32)
-TARGET_32=-target i386-pc-win32
-TARGET_64=-target x86_64-pc-windows-msvc
+TARGET_32=-target i386-pc-win32 -m32
+TARGET_64=-target x86_64-pc-windows-msvc -m64
 TARGETCL=/arch:$(if $(filter $(ARCH),x64),-m64,-m32)
 TARGETCL_32=-m32 /arch:SSE2
 TARGETCL_64=-m64 /arch:AVX2
@@ -57,36 +62,36 @@ SYSTEM_LIBGCC_INC_32=-L$(MSVC_LIB32) -L$(UniversalCRT_Lib32) -L$(WINSDK_LIB32)
 SYSTEM_LIBGCC_INC_64=-L$(MSVC_LIB64) -L$(UniversalCRT_Lib64) -L$(WINSDK_LIB64)
 SYSTEM_FLAGS=-fmsc-version=$(_MSC_VER) -fms-extensions -fms-compatibility -fdelayed-template-parsing
 
-# compiler binaries
+# llvm compiler binaries (tested with clang version 6.0.0 (tags/RELEASE_600/final))
 
 # clang compiler (GCC lookalike)
-C=$(LLVM)/clang $(TARGET) $(SYSTEM_INC) $(SYSTEM_FLAGS)
-CPP=$(LLVM)/clang++ $(TARGET) $(SYSTEM_INC)  $(SYSTEM_FLAGS)
-C32=$(LLVM)/clang $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
-CPP32=$(LLVM)/clang++ $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
-C64=$(LLVM)/clang $(TARGET_64) $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
-CPP64=$(LLVM)/clang++ $(TARGET_64)  $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
+C=$(LLVM_PATH)/clang $(TARGET) $(SYSTEM_INC) $(SYSTEM_FLAGS)
+CPP=$(LLVM_PATH)/clang++ $(TARGET) $(SYSTEM_INC)  $(SYSTEM_FLAGS)
+C32=$(LLVM_PATH)/clang $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
+CPP32=$(LLVM_PATH)/clang++ $(TARGET_32) $(SYSTEM_INC_32)  $(SYSTEM_FLAGS)
+C64=$(LLVM_PATH)/clang $(TARGET_64) $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
+CPP64=$(LLVM_PATH)/clang++ $(TARGET_64)  $(SYSTEM_INC_64)  $(SYSTEM_FLAGS)
 
-# clang linker (MSVC link.exe lookalike)
-LDD=$(LLVM)/lld -flavor link $(SYSTEM_LIB_INC)
-LDD32=$(LLVM)/lld -flavor link $(SYSTEM_LIB_INC_32)
-LDD64=$(LLVM)/lld -flavor link $(SYSTEM_LIB_INC_64)
+# clang lld linker (MSVC link.exe lookalike)
+LDD=$(LLVM_PATH)/lld -flavor link $(SYSTEM_LIB_INC)
+LDD32=$(LLVM_PATH)/lld -flavor link $(SYSTEM_LIB_INC_32)
+LDD64=$(LLVM_PATH)/lld -flavor link $(SYSTEM_LIB_INC_64)
 
 # clang's version of MSVC cl.exe compiler
-CL=$(LLVM)/clang-cl $(TARGETCL) $(SYSTEMCL_INC) $(SYSTEM_FLAGS)
-CL32=$(LLVM)/clang-cl $(TARGETCL_32) $(SYSTEMCL_INC_32) $(SYSTEM_FLAGS)
-CL64=$(LLVM)/clang-cl $(TARGETCL_64) $(SYSTEMCL_INC_64) $(SYSTEM_FLAGS)
+CL=$(LLVM_PATH)/clang-cl $(TARGETCL) $(SYSTEMCL_INC) $(SYSTEM_FLAGS)
+CL32=$(LLVM_PATH)/clang-cl $(TARGETCL_32) $(SYSTEMCL_INC_32) $(SYSTEM_FLAGS)
+CL64=$(LLVM_PATH)/clang-cl $(TARGETCL_64) $(SYSTEMCL_INC_64) $(SYSTEM_FLAGS)
 
 # clang's version of MSVC link.exe linker
-LINK=$(LLVM)/lld-link $(SYSTEM_LIB_INC)
-LINK32=$(LLVM)/lld-link $(SYSTEM_LIB_INC_32)
-LINK64=$(LLVM)/lld-link $(SYSTEM_LIB_INC_64)
+LINK=$(LLVM_PATH)/lld-link $(SYSTEM_LIB_INC)
+LINK32=$(LLVM_PATH)/lld-link $(SYSTEM_LIB_INC_32)
+LINK64=$(LLVM_PATH)/lld-link $(SYSTEM_LIB_INC_64)
 
 # llvm's version of MSVC lib.exe
 # /usr/local/opt/llvm/bin/llvm-lib /libpath:<path>] [/out:<output>] [/llvmlibthin] [/ignore] [/machine] [/nologo] [files…]
-LIB=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC) /nologo
-LIB32=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
-LIB64=$(LLVM)/llvm-lib $(SYSTEM_LIB_INC_64) /nologo
+LIB=$(LLVM_PATH)/llvm-lib $(SYSTEM_LIB_INC) /nologo
+LIB32=$(LLVM_PATH)/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
+LIB64=$(LLVM_PATH)/llvm-lib $(SYSTEM_LIB_INC_64) /nologo
 
 all: exe execl lib dll
 
