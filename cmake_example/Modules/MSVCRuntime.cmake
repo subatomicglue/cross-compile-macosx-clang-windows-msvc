@@ -1,6 +1,14 @@
+# usage:
+#   include("MSVCRuntime")
+#   configure_msvc_runtime()
+#
 # you can choose:
-# MSVC_RUNTIME=dynamic
-# MSVC_RUNTIME=static
+#   cmake -DMSVC_RUNTIME=dynamic
+#   cmake -DMSVC_RUNTIME=static
+#
+# or hard code it in CMakeLists.txt
+#   set( MSVC_RUNTIME dynamic )
+#   set( MSVC_RUNTIME static )
 
 macro(configure_msvc_runtime)
    if(WIN32)

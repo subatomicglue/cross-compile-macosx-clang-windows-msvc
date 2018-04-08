@@ -105,10 +105,10 @@ set( USE_CL TRUE )
 
 if (NOT USE_CL)
 # compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
-set( SYSFLAGS "-target ${triple} -DWIN32 -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+set( SYSFLAGS "-target ${triple} -DWIN32 -D_WINDOWS -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
 else()
 # compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
-set( SYSFLAGS "/MT /DWIN32 /imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+set( SYSFLAGS "/DWIN32 /D_WINDOWS /imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
 endif()
 
 foreach(lang C CXX)

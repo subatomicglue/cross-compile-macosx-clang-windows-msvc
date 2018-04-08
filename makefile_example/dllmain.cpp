@@ -2,7 +2,7 @@
 extern "C"
 {
    extern
-#ifdef WINDOWS
+#if defined(WIN32)
    __declspec(dllimport)
 #endif
    void vroooom();

@@ -3,7 +3,7 @@
 extern "C"
 {
 
-#if defined(WIN32) || defined(_WIN32) || defined(_WINDLL)
+#if defined(WIN32)
    __declspec(dllexport)
 #endif
    void vroooom() {
