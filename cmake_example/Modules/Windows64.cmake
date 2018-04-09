@@ -8,7 +8,7 @@
 #   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Windows64.cmake -G "Visual Studio 14 Win64" ..
 
-if (APPLE)
+if (NOT WIN32)
    #message( "We're going to use LLVM to cross compile to Windows for you" )
    set( CMAKE_SYSTEM_NAME LlvmWindowsCrossCompile )
    set( CMAKE_C_FLAGS_INIT "-m64 /MT" CACHE STRING "" FORCE)

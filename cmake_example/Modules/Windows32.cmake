@@ -6,7 +6,7 @@
 # - on Windows will generate a .sln project/solution for visual studio
 #   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Windows32.cmake -G "Visual Studio 14" ..
-if (APPLE)
+if (NOT WIN32)
    #message( "We're going to use LLVM to cross compile to Windows for you" )
    set( CMAKE_SYSTEM_NAME LlvmWindowsCrossCompile )
    set( CMAKE_C_FLAGS_INIT "-m32 /MT" CACHE STRING "" FORCE)
