@@ -24,7 +24,7 @@
 #    Or use CMAKE_SYSTEM_NAME to make your own toolchain file (see Modules/Windows??.cmake for ex)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules")
 
-SET(SRC ${CMAKE_CURRENT_SOURCE_DIR}/../makefile_example)
+SET(SRC ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 SET(ARCH ${CMAKE_LIBRARY_ARCHITECTURE})
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10.0 FATAL_ERROR)
