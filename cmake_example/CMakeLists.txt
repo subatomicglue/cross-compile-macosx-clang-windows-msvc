@@ -41,8 +41,6 @@ INCLUDE_DIRECTORIES(.)
 ADD_EXECUTABLE(mainCPP-${ARCH} ${SRC}/main.cpp)
 ADD_EXECUTABLE(mainC-${ARCH} ${SRC}/main.c)
 if (WIN32)
-   #set_property( TARGET mainCPP-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
-   #set_property( TARGET mainC-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
    target_link_libraries( mainCPP-${ARCH} optimized  "libcmt" )
    target_link_libraries( mainCPP-${ARCH} debug  "libcmtd" )
    target_link_libraries( mainC-${ARCH} optimized  "libcmt" )
@@ -57,7 +55,6 @@ TARGET_LINK_LIBRARIES(libmain-${ARCH} lib-${ARCH})
 if (WIN32)
    target_link_libraries( libmain-${ARCH} optimized  "libcmt" )
    target_link_libraries( libmain-${ARCH} debug  "libcmtd" )
-   #set_property( TARGET libmain-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
 
 # dynamic link library tests
@@ -67,17 +64,15 @@ TARGET_LINK_LIBRARIES(dllmain-${ARCH} dll-${ARCH})
 if (WIN32)
    target_link_libraries( dllmain-${ARCH} optimized  "libcmt" )
    target_link_libraries( dllmain-${ARCH} debug  "libcmtd" )
-   #set_property( TARGET dllmain-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
 
 
 # dynamic load library (plugin) tests
-add_library( plugin-${ARCH} MODULE ${SRC}/dll.cpp )
-ADD_EXECUTABLE(pluginmain-${ARCH} ${SRC}/plugin.cpp )
+add_library( plugin-${ARCH} MODULE ${SRC}/plugin.cpp )
+ADD_EXECUTABLE(pluginmain-${ARCH} ${SRC}/pluginmain.cpp )
 if (WIN32)
    target_link_libraries( pluginmain-${ARCH} optimized  "libcmt" )
    target_link_libraries( pluginmain-${ARCH} debug  "libcmtd" )
-   #set_property( TARGET pluginmain-${ARCH} APPEND_STRING PROPERTY LINK_LIBRARIES "libcmt" )
 endif()
 
 

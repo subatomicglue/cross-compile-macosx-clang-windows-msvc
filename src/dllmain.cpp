@@ -5,11 +5,11 @@ extern "C"
 #if defined(WIN32)
    __declspec(dllimport)
 #endif
-   void vroooom();
+   void init();
 }
 
 int main() {
-   vroooom();
+   init();
    return 0;
 }
 
