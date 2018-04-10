@@ -32,10 +32,12 @@ endif()
 # BUT CMAKE DOESNT SEEM TO ALLOW command line ARGS TO PLATFORM OR TOOLCHAIN FILES...   seriously WTF guys
 # HOW TO CONFIGURE?   variables seem to be set, but PlatForm file is included multiple times,
 # and variables cleared out of the cache.  Got a solution - anyone?  Until then, give a couple fallbacks..
-IF(EXISTS "$ENV{HOME}/MSVC")
-   set( PROGRAMFILES "$ENV{HOME}/MSVC")
-elseif(EXISTS "/Volumes/[C] Windows 10/Program Files (x86)")
-   set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)")
+if (NOT EXISTS PROGRAMFILES)
+   IF(EXISTS "$ENV{HOME}/MSVC")
+      set( PROGRAMFILES "$ENV{HOME}/MSVC")
+   elseif(EXISTS "/Volumes/[C] Windows 10/Program Files (x86)")
+      set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)")
+   endif()
 endif()
 IF(NOT EXISTS "${PROGRAMFILES}")
    message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\nOr put a copy under $HOME/MSVC\n\n" )
