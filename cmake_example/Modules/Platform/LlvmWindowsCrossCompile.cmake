@@ -27,12 +27,18 @@ if (NOT DEFINED ARCH)
 endif()
 
 # MSVC Includes and Libs:
-# currently I am mounting MSVC from Parallels - override with  "cmake -DPROGRAMFILES=/whatever/"
-if (NOT DEFINED PROGRAMFILES)
-   set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)" )
+# currently I am mounting MSVC from Parallels
+# I WISH WE COULD override with  "cmake -DPROGRAMFILES=/whatever/"
+# BUT CMAKE DOESNT SEEM TO ALLOW command line ARGS TO PLATFORM OR TOOLCHAIN FILES...   seriously WTF guys
+# HOW TO CONFIGURE?   variables seem to be set, but PlatForm file is included multiple times,
+# and variables cleared out of the cache.  Got a solution - anyone?  Until then, give a couple fallbacks..
+IF(EXISTS "$ENV{HOME}/MSVC")
+   set( PROGRAMFILES "$ENV{HOME}/MSVC")
+elseif(EXISTS "/Volumes/[C] Windows 10/Program Files (x86)")
+   set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)")
 endif()
 IF(NOT EXISTS "${PROGRAMFILES}")
-   message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    ${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\n\n" )
+   message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\n\n" )
 endif()
 
 # LLVM binary location

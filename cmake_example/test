@@ -1,0 +1,18 @@
+
+# native tests.   For windows tests, go run test.bat (under windows!)
+
+cd build32 && ./mainC-x86 && cd -
+cd build64 && ./mainC-x64 && cd -
+
+cd build32 && ./mainCPP-x86 && cd -
+cd build64 && ./mainCPP-x64 && cd -
+
+cd build32 && ./libmain-x86 && cd -
+cd build64 && ./libmain-x64 && cd -
+
+cd build32 && ./dllmain-x86 && cd -
+cd build64 && ./dllmain-x64 && cd -
+
+cd build32 && ./pluginmain-x86 && cd -
+cd build64 && ./pluginmain-x64 && cd -
+

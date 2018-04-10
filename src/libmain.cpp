@@ -1,8 +1,8 @@
 
-extern void vroooom();
+extern void init();
 
 int main() {
-   vroooom();
+   init();
    return 0;
 }
 

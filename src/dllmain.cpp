@@ -5,11 +5,11 @@ extern "C"
 #if defined(WIN32)
    __declspec(dllimport)
 #endif
-   void init();
+   void blend();
 }
 
 int main() {
-   init();
+   blend();
    return 0;
 }
 
