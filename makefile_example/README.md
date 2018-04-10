@@ -14,13 +14,16 @@ Included are both 32 and 64bit examples for:
 Prerequisites:
 - MacOSX High Sierra (or similar)
 - MacOSX terminal
-- Parallels 13 (or similar) - virtualization host
-- Windows10 installed under Parallels
-  - Windows `C:\` mounted under MacOSX `/Volumes/[C] Windows 10/`.  This is how `clang` will find the MSVC compiler `lib/` & `include/` directories.
-- Microsoft Visual Studio 2015 w/ windows sdk (for includes and libs)
+- Windows10
+- Microsoft Visual Studio 2015 w/ windows sdk (include/ and lib/ dirs)
+  - Installed in one of the following locations:
+    - `$HOME/MSVC`
+    - `/Volumes/[C] Windows 10/Program Files (x86)/`
+      - If using Parallels, you can mount Windows `C:\` under MacOSX `/Volumes/[C] Windows 10/`.
 - `brew install llvm`  (clang compiler version 6.0.0, or similar)
   - clang/clang++
   - lld
+- Optional: Parallels 13 (or similar) - virtualization host running Windows 10
 
 View the Makefile for details.
 

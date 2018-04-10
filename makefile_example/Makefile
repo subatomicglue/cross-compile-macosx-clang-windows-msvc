@@ -12,7 +12,9 @@ SRC=../src
 LIBS=libcmt.lib
 
 # base locations of MSVC toolchain:
-PROGRAMFILES_PATH=/Volumes/[C] Windows 10/Program Files (x86)
+PROGRAMFILES_PATH1=$(HOME)/MSVC                                 # search location #1
+PROGRAMFILES_PATH2=/Volumes/[C] Windows 10/Program Files (x86)  # search location #2
+PROGRAMFILES_PATH=$(shell if [ -d "$(PROGRAMFILES_PATH1)" ]; then echo "$(PROGRAMFILES_PATH1)"; else echo "$(PROGRAMFILES_PATH2)"; fi )
 WINDOWS_KITS10_PATH=$(PROGRAMFILES_PATH)/Windows Kits/10
 WINDOWS_KITS81_PATH=$(PROGRAMFILES_PATH)/Windows Kits/8.1
 MSVC_PATH=$(PROGRAMFILES_PATH)/Microsoft Visual Studio 14.0/VC
