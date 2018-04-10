@@ -38,7 +38,7 @@ elseif(EXISTS "/Volumes/[C] Windows 10/Program Files (x86)")
    set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)")
 endif()
 IF(NOT EXISTS "${PROGRAMFILES}")
-   message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\n\n" )
+   message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\nOr put a copy under $HOME/MSVC\n\n" )
 endif()
 
 # LLVM binary location
