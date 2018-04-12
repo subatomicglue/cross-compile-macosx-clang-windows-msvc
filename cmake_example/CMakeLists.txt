@@ -34,7 +34,8 @@ SET(CMAKE_CXX_EXTENSIONS OFF)
 PROJECT(crosscompilewindows)
 
 
-INCLUDE_DIRECTORIES(.)
+INCLUDE_DIRECTORIES(. ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/test)
+link_directories(. ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/test)
 
 
 # executable tests

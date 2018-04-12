@@ -8,7 +8,7 @@
 SET(CMAKE_SYSTEM_NAME LlvmWindowsCrossCompile CACHE STRING "Target system.")
 
 # if you want to see the compiler commands, set to TRUE
-SET( VERBOSE_OUTPUT FALSE )
+SET( VERBOSE_OUTPUT TRUE )
 
 # useful paths:
 #    /usr/local/Cellar/cmake/3.10.3/share/cmake/Modules/Platform/Windows-MSVC.cmake
@@ -27,20 +27,28 @@ if (NOT DEFINED ARCH)
 endif()
 
 # MSVC Includes and Libs:
-# currently I am mounting MSVC from Parallels
 # I WISH WE COULD override with  "cmake -DPROGRAMFILES=/whatever/"
 # BUT CMAKE DOESNT SEEM TO ALLOW command line ARGS TO PLATFORM OR TOOLCHAIN FILES...   seriously WTF guys
-# HOW TO CONFIGURE?   variables seem to be set, but PlatForm file is included multiple times,
-# and variables cleared out of the cache.  Got a solution - anyone?  Until then, give a couple fallbacks..
+# HOW TO CONFIGURE?   variables seem to be set first time, but PlatForm file is included multiple times, and subsequent times the variables passed into cmake -D then become unset
+# Got a solution - anyone?  Until then, I'll hardcode a couple fallback paths...
+
+# list of paths to look for the base MSVC inc/lib dirs
+# ordered by least to highest priority (last one wins)
+set( PROGRAMFILES_LOCATIONS
+   "/Volumes/[C] Windows 10/Program Files (x86)"
+   "$ENV{HOME}/MSVC"
+   "./MSVC"
+)
+# see which path exists:
 if (NOT EXISTS PROGRAMFILES)
-   IF(EXISTS "$ENV{HOME}/MSVC")
-      set( PROGRAMFILES "$ENV{HOME}/MSVC")
-   elseif(EXISTS "/Volumes/[C] Windows 10/Program Files (x86)")
-      set( PROGRAMFILES "/Volumes/[C] Windows 10/Program Files (x86)")
-   endif()
+   foreach( path ${PROGRAMFILES_LOCATIONS} )
+      IF(EXISTS "${path}")
+         set( PROGRAMFILES "${path}")
+      endif()
+   endforeach()
 endif()
 IF(NOT EXISTS "${PROGRAMFILES}")
-   message(FATAL_ERROR "\n\nERROR: INCLUDE/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\nOr put a copy under $HOME/MSVC\n\n" )
+   message(FATAL_ERROR "\nERROR: MSVC BASE INC/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\nOr put a copy under one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
 endif()
 
 # LLVM binary location
@@ -53,6 +61,13 @@ endif()
 
 # MSVC location:
 # http://marcofoco.com/microsoft-visual-c-version-map/
+set( MSVC_BASE_LOCATIONS
+   "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC" # 2017
+   "${PROGRAMFILES}/Microsoft Visual Studio 14.0/VC" # 2015
+   "${PROGRAMFILES}/Microsoft Visual Studio 12.0/VC" # 2013
+   "${PROGRAMFILES}/Microsoft Visual Studio 11.0/VC" # 2012
+   "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC" # 2010
+)
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC") # 2017
    set( _MSC_VER 1910 )
    set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC" )
@@ -74,24 +89,24 @@ IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC") # 2010
    set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC" )
 endif()
 if (NOT DEFINED _MSC_VER)
-   message(FATAL_ERROR "\n\nERROR: Visual Studio Installation not found/recognized in ${PROGRAMFILES}:\n    Please install it.\n\n" )
+   message(FATAL_ERROR "\n\nERROR: 'Microsoft Visual Studio x.x/VC' not found in '${PROGRAMFILES}'.\n\nPlease install MSVC incs/libs in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
 endif()
 if (NOT DEFINED MSVC_BASE_DIR)
-   message(FATAL_ERROR "\n\nERROR: Visual Studio Installation not found/recognized in ${PROGRAMFILES}:\n    Please install it.\n\n" )
+   message(FATAL_ERROR "\n\nERROR: 'Microsoft Visual Studio x.x/VC' not found in '${PROGRAMFILES}'.\n\nPlease install MSVC incs/libs in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
 endif()
 
 IF(EXISTS "${PROGRAMFILES}/Windows Kits/10") # 2010
    set( WINKIT10_BASE_DIR "${PROGRAMFILES}/Windows Kits/10" )
 endif()
 if (NOT DEFINED WINKIT10_BASE_DIR)
-   message(FATAL_ERROR "\n\nERROR: 'Windows Kits/10' not found in ${PROGRAMFILES}:\n    Please install it, should come with MSVC.\n\n" )
+   message(FATAL_ERROR "\n\nERROR: 'Windows Kits/10' not found in ${PROGRAMFILES}, or in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n    Please install it, should come with MSVC.\n\n" )
 endif()
 
 IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.1") # 2010
    set( WINKIT81_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.1" )
 endif()
 if (NOT DEFINED WINKIT81_BASE_DIR)
-   message(FATAL_ERROR "\n\nERROR: 'Windows Kits/81' not found in ${PROGRAMFILES}:\n    Please install it, should come with MSVC.\n\n" )
+   message(FATAL_ERROR "\n\nERROR: 'Windows Kits/81' not found in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n    Please install it, should come with MSVC.\n\n" )
 endif()
 
 # include paths
@@ -124,16 +139,23 @@ set( USE_LINK TRUE )
 
 if (NOT USE_CL)
    # compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
-   set( SYSFLAGS "-target ${triple} -DWIN32 -D_WINDOWS -isystem \"${MSVC_INCLUDE}\" -isystem \"${UniversalCRT_IncludePath}\" -isystem \"${WINSDK_INC}\" -isystem \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+   add_definitions( -target ${triple} -DWIN32 -D_WINDOWS -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing )
 else()
    # compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
-   set( SYSFLAGS "/DWIN32 /D_WINDOWS /imsvc \"${MSVC_INCLUDE}\" /imsvc \"${UniversalCRT_IncludePath}\" /imsvc \"${WINSDK_INC}\" /imsvc \"${WINSDK_SHARED_INC32}\" -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" )
+   add_definitions( /DWIN32 /D_WINDOWS -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing )
 endif()
 
+set(CMAKE_SYSROOT "")
+include_directories(SYSTEM ${MSVC_INCLUDE} ${UniversalCRT_IncludePath} ${WINSDK_INC} ${WINSDK_SHARED_INC32})
+
 foreach(lang C CXX)
-   set( CMAKE_${lang}_COMPILE_OPTIONS_PIC "" )
+   set( CMAKE_${lang}_COMPILE_OPTIONS_PIC "" ) # no -fPIC in windows land
    set( CMAKE_SHARED_LIBRARY_${lang}_FLAGS "" )
-   set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "${SYSFLAGS}" CACHE STRING "" FORCE )
+   if (NOT USE_CL)
+      set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem" CACHE STRING "" FORCE )
+   else()
+      set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "/imsvc" CACHE STRING "" FORCE )
+   endif()
    set( CMAKE_LIB_SYSTEM_PATHS_${lang} "/libpath:\"${MSVC_LIB}\" /libpath:\"${UniversalCRT_Lib}\" /libpath:\"${WINSDK_LIB}\"" CACHE STRING "" FORCE )
 endforeach()
 #set( CMAKE_SHARED_LINKER_FLAGS "" )
@@ -212,8 +234,8 @@ foreach(lang C CXX)
     set(_CMAKE_VS_LINK_EXE "")#"<CMAKE_COMMAND> -E vs_link_exe --intdir=<OBJECT_DIR> --manifests <MANIFESTS> -- ")
    endif()
 
-   set(CMAKE_${lang}_COMPILE_OBJECT "<CMAKE_${lang}_COMPILER> ${CMAKE_INCLUDE_SYSTEM_FLAG_${lang}} <DEFINES> <FLAGS> ${${lang}_COMPILE_OBJECT_FLAG} ${${lang}_COMPILE_OBJECT_SOURCE_FLAG}<SOURCE> ${${lang}_COMPILE_OBJECT_OUTPUT_FLAG}<OBJECT>  " CACHE STRING "" FORCE)
-   set(CMAKE_${lang}_LINK_EXECUTABLE "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <LINK_FLAGS> /subsystem:console /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET>${CMAKE_END_TEMP_FILE}")
+   set(CMAKE_${lang}_COMPILE_OBJECT "<CMAKE_${lang}_COMPILER> <INCLUDES> <DEFINES> <FLAGS> ${${lang}_COMPILE_OBJECT_FLAG} ${${lang}_COMPILE_OBJECT_SOURCE_FLAG}<SOURCE> ${${lang}_COMPILE_OBJECT_OUTPUT_FLAG}<OBJECT>  " CACHE STRING "" FORCE)
+   set(CMAKE_${lang}_LINK_EXECUTABLE "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> /subsystem:console /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET>${CMAKE_END_TEMP_FILE}")
    set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_${lang}_SYSTEM_LINK_FLAGS} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR>${_PLATFORM_LINK_FLAGS} <LINK_FLAGS> /NODEFAULTLIB:MSVCRT <LINK_LIBRARIES> /out:<TARGET> ${CMAKE_END_TEMP_FILE}")
    set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
    set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "${CMAKE_LIB} ${CMAKE_LIB_SYSTEM_PATHS_${lang}} <LINK_FLAGS> ${CMAKE_CL_NOLOGO} <OBJECTS> /out:<TARGET>")
@@ -264,6 +286,7 @@ endforeach()
 #enable_language(RC)
 
 # set up common flags, prefixes, suffixes:
+# https://cmake.org/pipermail/cmake-developers/2017-March/029929.html
 set(CMAKE_STATIC_LIBRARY_PREFIX  ""             CACHE STRING "Library prefix" FORCE)
 SET(CMAKE_STATIC_LIBRARY_SUFFIX  ".lib"         CACHE STRING "Static library extension" FORCE)
 set(CMAKE_SHARED_LIBRARY_PREFIX  ""             CACHE STRING "Library prefix" FORCE)
