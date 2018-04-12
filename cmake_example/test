@@ -13,6 +13,11 @@ cd build64 && ./libmain-x64 && cd -
 cd build32 && ./dllmain-x86 && cd -
 cd build64 && ./dllmain-x64 && cd -
 
+
+# in bash shell, you have to run from the directory .exe is in
+# in order for the plugin to be found in same dir
+# seems not to be an issue for cmd.exe however.
+
 cd build32 && ./pluginmain-x86 && cd -
 cd build64 && ./pluginmain-x64 && cd -
 
