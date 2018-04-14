@@ -1,0 +1,40 @@
+
+# currently support 2013 (12) and 2015 (14)
+
+if [ "$#" -ne 2 ]; then
+   echo "This script will copy your MSVC2013 or 2015 inc/lib dir tree to your home directory under $HOME/MSVC"
+   echo "Just provide:"
+   echo " - the base of your MSVC (usually Program Files (x86))"
+   echo " - the version on your .../Microsoft Visual Studio XX.0/VC/ directory with the inc/libs"
+   echo ""
+   echo "usage: $0 \"/Volumes/C/Program Files (x86)\" 12|14"
+   echo ""
+   exit -1
+fi
+
+rm -rf "$HOME/MSVC"
+
+if [ $2 -eq 12 ]; then
+   mkdir -p "$HOME/MSVC/Microsoft Visual Studio 12.0/VC"
+   mkdir -p "$HOME/MSVC/Windows Kits/8.0"
+   mkdir -p "$HOME/MSVC/Windows Kits/8.1"
+   cp -r "$1/Microsoft Visual Studio 12.0/VC/include" "$HOME/MSVC/Microsoft Visual Studio 12.0/VC/"
+   cp -r "$1/Microsoft Visual Studio 12.0/VC/lib" "$HOME/MSVC/Microsoft Visual Studio 12.0/VC/"
+   cp -r "$1/Windows Kits/8.0/Include" "$HOME/MSVC/Windows Kits/8.0/"
+   cp -r "$1/Windows Kits/8.0/Lib" "$HOME/MSVC/Windows Kits/8.0/"
+   cp -r "$1/Windows Kits/8.1/Include" "$HOME/MSVC/Windows Kits/8.1/"
+   cp -r "$1/Windows Kits/8.1/Lib" "$HOME/MSVC/Windows Kits/8.1/"
+fi
+
+if [ $2 -eq 14 ]; then
+   mkdir -p "$HOME/MSVC/Microsoft Visual Studio 14.0/VC"
+   mkdir -p "$HOME/MSVC/Windows Kits/8.1"
+   mkdir -p "$HOME/MSVC/Windows Kits/10"
+   cp -r "$1/Microsoft Visual Studio 14.0/VC/include" "$HOME/MSVC/Microsoft Visual Studio 14.0/VC/"
+   cp -r "$1/Microsoft Visual Studio 14.0/VC/lib" "$HOME/MSVC/Microsoft Visual Studio 14.0/VC/"
+   cp -r "$1/Windows Kits/8.1/Include" "$HOME/MSVC/Windows Kits/8.1/"
+   cp -r "$1/Windows Kits/8.1/Lib" "$HOME/MSVC/Windows Kits/8.1/"
+   cp -r "$1/Windows Kits/10/Include" "$HOME/MSVC/Windows Kits/10/"
+   cp -r "$1/Windows Kits/10/Lib" "$HOME/MSVC/Windows Kits/10/"
+fi
+

@@ -26,14 +26,21 @@ if (NOT DEFINED ARCH)
    set( ARCH "x64" CACHE STRING "" FORCE )
 endif()
 
+foreach(lang C CXX)
+   set( CMAKE_LIB_SYSTEM_PATHS_${lang} "" )
+endforeach()
+
 # MSVC Includes and Libs:
 # I WISH WE COULD override with  "cmake -DPROGRAMFILES=/whatever/"
 # BUT CMAKE DOESNT SEEM TO ALLOW command line ARGS TO PLATFORM OR TOOLCHAIN FILES...   seriously WTF guys
-# HOW TO CONFIGURE?   variables seem to be set first time, but PlatForm file is included multiple times, and subsequent times the variables passed into cmake -D then become unset
+# HOW TO CONFIGURE?   variables seem to be set first time, but PlatForm file is included multiple times,
+#     and subsequent times the variables passed into cmake -D then become unset
 # Got a solution - anyone?  Until then, I'll hardcode a couple fallback paths...
 
 # list of paths to look for the base MSVC inc/lib dirs
 # ordered by least to highest priority (last one wins)
+#
+# tested: MSVC 2013 and MSVC 2015 - you may have to modify/extend the below to match other versions of MSVC!
 set( PROGRAMFILES_LOCATIONS
    "/Volumes/[C] Windows 10/Program Files (x86)"
    "$ENV{HOME}/MSVC"
@@ -48,7 +55,7 @@ if (NOT EXISTS PROGRAMFILES)
    endforeach()
 endif()
 IF(NOT EXISTS "${PROGRAMFILES}")
-   message(FATAL_ERROR "\nERROR: MSVC BASE INC/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version ${_MSC_VER} v2015\nOr put a copy under one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
+   message(FATAL_ERROR "\nERROR: MSVC BASE INC/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version v2013 or 2015 (or greater)\nOr put a copy under one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
 endif()
 
 # LLVM binary location
@@ -94,37 +101,58 @@ endif()
 if (NOT DEFINED MSVC_BASE_DIR)
    message(FATAL_ERROR "\n\nERROR: 'Microsoft Visual Studio x.x/VC' not found in '${PROGRAMFILES}'.\n\nPlease install MSVC incs/libs in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
 endif()
+include_directories(SYSTEM ${MSVC_BASE_DIR}/include)
+if (ARCH STREQUAL "x64" )
+   foreach(lang C CXX)
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${MSVC_BASE_DIR}/lib/amd64\" " CACHE STRING "" FORCE )
+   endforeach()
+else()
+   foreach(lang C CXX)
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${MSVC_BASE_DIR}/lib\" " CACHE STRING "" FORCE )
+   endforeach()
+endif()
 
-IF(EXISTS "${PROGRAMFILES}/Windows Kits/10") # 2010
+# add on the windowkit dirs
+IF(EXISTS "${PROGRAMFILES}/Windows Kits/10")
    set( WINKIT10_BASE_DIR "${PROGRAMFILES}/Windows Kits/10" )
+   include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include)
+   include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include/10.0.10150.0/ucrt)
+   include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include/10.0.10240.0/ucrt)
+   include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include/10.0.14393.0/ucrt)
+   foreach(lang C CXX)
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${WINKIT10_BASE_DIR}/Lib/10.0.10150.0/ucrt/${ARCH}\" " CACHE STRING "" FORCE )
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${WINKIT10_BASE_DIR}/Lib/10.0.10240.0/ucrt/${ARCH}\" " CACHE STRING "" FORCE )
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${WINKIT10_BASE_DIR}/Lib/10.0.14393.0/ucrt/${ARCH}\" " CACHE STRING "" FORCE )
+   endforeach()
 endif()
-if (NOT DEFINED WINKIT10_BASE_DIR)
-   message(FATAL_ERROR "\n\nERROR: 'Windows Kits/10' not found in ${PROGRAMFILES}, or in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n    Please install it, should come with MSVC.\n\n" )
+IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.1")
+   set( WINKIT81_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.1" )
+   include_directories(SYSTEM ${WINKIT81_BASE_DIR}/Include/um)
+   include_directories(SYSTEM ${WINKIT81_BASE_DIR}/Include/shared)
+   foreach(lang C CXX)
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${WINKIT81_BASE_DIR}/Lib/winv6.3/um/${ARCH}\"" CACHE STRING "" FORCE )
+   endforeach()
+endif()
+IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.0")
+   set( WINKIT80_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.0" )
+   include_directories(SYSTEM ${WINKIT80_BASE_DIR}/Include/um)
+   foreach(lang C CXX)
+      set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${WINKIT80_BASE_DIR}/Lib/Win8/um/${ARCH}\"" CACHE STRING "" FORCE )
+   endforeach()
 endif()
 
-IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.1") # 2010
-   set( WINKIT81_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.1" )
-endif()
-if (NOT DEFINED WINKIT81_BASE_DIR)
-   message(FATAL_ERROR "\n\nERROR: 'Windows Kits/81' not found in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n    Please install it, should come with MSVC.\n\n" )
-endif()
+# debug the lib paths.
+#message( ${CMAKE_LIB_SYSTEM_PATHS_C} )
+#message( ${CMAKE_LIB_SYSTEM_PATHS_CXX} )
 
 # include paths
-set( UniversalCRT_IncludePath "${WINKIT10_BASE_DIR}/Include/10.0.10150.0/ucrt" )
-set( UniversalCRT_Lib "${WINKIT10_BASE_DIR}/Lib/10.0.10150.0/ucrt/${ARCH}" )
-set( MSVC_INCLUDE "${MSVC_BASE_DIR}/include" )
 if (ARCH STREQUAL "x64" )
-   set( MSVC_LIB "${MSVC_BASE_DIR}/lib/amd64" )
    set( triple "x86_64-pc-windows-msvc" )
    set(CMAKE_LIBRARY_ARCHITECTURE x64 CACHE STRING "" FORCE)
 else()
-   set( MSVC_LIB "${MSVC_BASE_DIR}/lib" )
    set( triple "i386-pc-win32" )
    set(CMAKE_LIBRARY_ARCHITECTURE x86 CACHE STRING "" FORCE)
 endif()
-set( WINSDK_INC "${WINKIT81_BASE_DIR}/Include/um" )
-set( WINSDK_SHARED_INC32 "${WINKIT81_BASE_DIR}/Include/shared" )
-set( WINSDK_LIB "${WINKIT81_BASE_DIR}/Lib/winv6.3/um/${ARCH}" )
 
 if(CMAKE_VERBOSE_MAKEFILE)
   set(CMAKE_CL_NOLOGO)
@@ -146,7 +174,6 @@ else()
 endif()
 
 set(CMAKE_SYSROOT "")
-include_directories(SYSTEM ${MSVC_INCLUDE} ${UniversalCRT_IncludePath} ${WINSDK_INC} ${WINSDK_SHARED_INC32})
 
 foreach(lang C CXX)
    set( CMAKE_${lang}_COMPILE_OPTIONS_PIC "" ) # no -fPIC in windows land
@@ -156,7 +183,6 @@ foreach(lang C CXX)
    else()
       set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "/imsvc" CACHE STRING "" FORCE )
    endif()
-   set( CMAKE_LIB_SYSTEM_PATHS_${lang} "/libpath:\"${MSVC_LIB}\" /libpath:\"${UniversalCRT_Lib}\" /libpath:\"${WINSDK_LIB}\"" CACHE STRING "" FORCE )
 endforeach()
 #set( CMAKE_SHARED_LINKER_FLAGS "" )
 
