@@ -33,6 +33,13 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 PROJECT(crosscompilewindows)
 
+# enable .rc file compilation
+if (WIN32 OR MSVC)
+  enable_language(RC) # cmake doesn't automatically pick this up
+                      # and calling it from our Platform/Llvm...
+                      # results in recursive error from cmake
+endif()
+
 
 INCLUDE_DIRECTORIES(. ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/test)
 link_directories(. ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/test)
