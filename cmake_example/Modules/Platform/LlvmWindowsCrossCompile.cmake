@@ -316,7 +316,8 @@ endforeach()
 #   string(APPEND CMAKE_RC_FLAGS_DEBUG_INIT " /D_DEBUG")
 #endif()
 
-
+# you'll need to enable this from your CMakeLists.txt (if MSVC or WIN32)
+# when compiling .rc files...
 #enable_language(RC)
 
 # set up common flags, prefixes, suffixes:
@@ -350,7 +351,9 @@ if (NOT USE_CL)
 else()
    set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "" CACHE STRING "option to enable c++ 11" FORCE)
 endif()
-set (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")
+set(CMAKE_LINK_DEF_FILE_FLAG "/DEF:")
+SET(CMAKE_RC_OUTPUT_EXTENSION .res)
+SET(CMAKE_RC_SOURCE_FILE_EXTENSIONS .rc)
 
 
 # some additional crypto-teric cmake stuff, for your pleasure:
