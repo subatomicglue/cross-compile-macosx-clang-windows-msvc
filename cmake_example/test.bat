@@ -17,12 +17,6 @@ build-wincross64\mainCPP-x64.exe
 build-wincross32\mainC-x86.exe
 build-wincross64\mainC-x64.exe
 
-build-wincross32\mainCPP-x86-cl.exe
-build-wincross64\mainCPP-x64-cl.exe
-
-build-wincross32\mainC-x86-cl.exe
-build-wincross64\mainC-x64-cl.exe
-
 build-wincross32\libmain-x86.exe
 build-wincross64\libmain-x64.exe
 
