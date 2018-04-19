@@ -7,6 +7,7 @@
 #endif
 
 typedef void (*vroooom_func)();
+typedef void (*crash_func)();
 
 int main()
 {
@@ -30,6 +31,7 @@ int main()
       return -1;
    }
 
+   // test a function that was exported using __declspec(export).
    printf( "Finding plugin entrypoint 'vroooom':\n" );
    vroooom_func vroooom = NULL;
 #if defined(WIN32)
@@ -47,12 +49,13 @@ int main()
       printf( "Couldn't find 'vroooom' in DLL plugin\n" );
    }
 
-
-   vroooom_func crash = NULL;
+   // test a function that was exported using .def file.
+   printf( "Finding plugin entrypoint 'crash':\n" );
+   crash_func crash = NULL;
 #if defined(WIN32)
-   crash = (vroooom_func)GetProcAddress( (HMODULE)module, "crash" );
+   crash = (crash_func)GetProcAddress( (HMODULE)module, "crash" );
 #else
-   crash = (vroooom_func)dlsym( module, "crash" );
+   crash = (crash_func)dlsym( module, "crash" );
 #endif
    if (crash)
    {

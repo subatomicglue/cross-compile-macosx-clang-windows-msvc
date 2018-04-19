@@ -108,59 +108,68 @@ all: exe execl lib dll
 # using clang/clang++ -target and lld -flavor link
 exe:
 	@echo "\n==================="
+	@echo "compile windows resource (.rc => .res) (optional, just gives us an icon)"
+	$(RC) /FO resource.res $(SRC)/resource.rc
+	@echo "\n==================="
 	@echo "create 64bit C++ Executable (.exe)  (using clang++ & lld)"
 	$(CPP64) $(DEFINES) -c $(SRC)/main.cpp -o mainCPP-x64.o
-	$(LDD64) $(LIBS) /subsystem:console /out:mainCPP-x64.exe mainCPP-x64.o
+	$(LDD64) $(LIBS) /subsystem:console /out:mainCPP-x64.exe resource.res mainCPP-x64.o
 	@echo "\n==================="
 	@echo "create 64bit C Executable (.exe)  (using clang & lld)"
 	$(C64) -c $(SRC)/main.c -o mainC-x64.o
-	$(LDD64) $(LIBS) /subsystem:console /out:mainC-x64.exe mainC-x64.o
+	$(LDD64) $(LIBS) /subsystem:console /out:mainC-x64.exe resource.res mainC-x64.o
 	@echo "\n==================="
 	@echo "create 32bit C++ Executable (.exe)  (using clang++ & lld)"
 	$(CPP32) $(DEFINES) -c $(SRC)/main.cpp -o mainCPP-x86.o
-	$(LDD32) $(LIBS) /subsystem:console /out:mainCPP-x86.exe mainCPP-x86.o
+	$(LDD32) $(LIBS) /subsystem:console /out:mainCPP-x86.exe resource.res mainCPP-x86.o
 	@echo "\n==================="
 	@echo "create 32bit C Executable (.exe)  (using clang & lld)"
 	$(C32) -c $(SRC)/main.c -o mainC-x86.o
-	$(LDD32) $(LIBS) /subsystem:console /out:mainC-x86.exe mainC-x86.o
+	$(LDD32) $(LIBS) /subsystem:console /out:mainC-x86.exe resource.res mainC-x86.o
 
 # executable - compile and link windows .exe
 # using clang-cl and lld-link
 execl:
 	@echo "\n==================="
+	@echo "compile windows resource (.rc => .res) (optional, just gives us an icon)"
+	$(RC) /FO resource.res $(SRC)/resource.rc
+	@echo "\n==================="
 	@echo "create 64bit C++ Executable (.exe) (using clang-cl & lld-link)"
 	$(CL64) /c /Tp$(SRC)/main.cpp /omainCPP-x64.o
-	$(LINK64) $(LIBS) /subsystem:console /out:mainCPP-x64-cl.exe mainCPP-x64.o
+	$(LINK64) $(LIBS) /subsystem:console /out:mainCPP-x64-cl.exe resource.res mainCPP-x64.o
 	@echo "\n==================="
 	@echo "create 64bit C Executable (.exe) (using clang-cl & lld-link)"
 	$(CL64) /c /Tc$(SRC)/main.c /omainC-x64.o
-	$(LINK64) $(LIBS) /subsystem:console /out:mainC-x64-cl.exe mainC-x64.o
+	$(LINK64) $(LIBS) /subsystem:console /out:mainC-x64-cl.exe resource.res mainC-x64.o
 	@echo "\n==================="
 	@echo "create 32bit C++ Executable (.exe) (using clang-cl & lld-link)"
 	$(CL32) /c /Tp$(SRC)/main.cpp /omainCPP-x86.o
-	$(LINK32) $(LIBS) /subsystem:console /out:mainCPP-x86-cl.exe mainCPP-x86.o
+	$(LINK32) $(LIBS) /subsystem:console /out:mainCPP-x86-cl.exe resource.res mainCPP-x86.o
 	@echo "\n==================="
 	@echo "create 32bit  C Executable (.exe) (using clang-cl & lld-link)"
 	$(CL32) /c /Tc$(SRC)/main.c /omainC-x86.o
-	$(LINK32) $(LIBS) /subsystem:console /out:mainC-x86-cl.exe mainC-x86.o
+	$(LINK32) $(LIBS) /subsystem:console /out:mainC-x86-cl.exe resource.res mainC-x86.o
 
 # static linking - compile .lib and link into a windows .exe
 # using clang-cl and lld-link
 lib:
+	@echo "\n==================="
+	@echo "compile windows resource (.rc => .res) (optional, just gives us an icon)"
+	$(RC) /FO resource.res $(SRC)/resource.rc
 	@echo "\n==================="
 	@echo "create 64bit C++ Library (.lib)"
 	$(CPP64) $(DEFINES) -c $(SRC)/lib.cpp -o lib-x64.o
 	$(LIB64) /out:lib-x64.lib lib-x64.o
 	@echo "\nstatically link that lib into a 64bit Executable (.exe)"
 	$(CPP64) $(DEFINES) -c $(SRC)/libmain.cpp -o libmain-x64.o
-	$(LINK64) $(LIBS) lib-x64.lib /subsystem:console /out:libmain-x64.exe libmain-x64.o
+	$(LINK64) $(LIBS) lib-x64.lib /subsystem:console /out:libmain-x64.exe resource.res libmain-x64.o
 	@echo "\n==================="
 	@echo "create 32bit C++ Library (.lib)"
 	$(CPP32) $(DEFINES) -c $(SRC)/lib.cpp -o lib-x86.o
 	$(LIB32) /out:lib-x86.lib lib-x86.o
 	@echo "\nstatically link that lib into a 64bit Executable (.exe)"
 	$(CPP32) $(DEFINES) -c $(SRC)/libmain.cpp -o libmain-x86.o
-	$(LINK32) $(LIBS) lib-x86.lib /subsystem:console /out:libmain-x86.exe libmain-x86.o
+	$(LINK32) $(LIBS) lib-x86.lib /subsystem:console /out:libmain-x86.exe resource.res libmain-x86.o
 
 
 # dynamic linking - compile .lib/.dll and link into a windows .exe
@@ -168,7 +177,7 @@ lib:
 # using clang++ and lld-link
 dll:
 	@echo "\n==================="
-	@echo "compile windows resource (.rc => .res)"
+	@echo "compile windows resource (.rc => .res) (optional, just gives us an icon)"
 	$(RC) /FO resource.res $(SRC)/resource.rc
 	@echo "\n==================="
 	@echo "create 64bit C++ DLL (.lib/.dll)"
@@ -179,7 +188,7 @@ dll:
 	$(LINK64) $(LIBS) resource.res dll-x64.lib /subsystem:console /out:dllmain-x64.exe dllmain-x64.o
 	@echo "\ncreate 64bit C++ Plugin DLL (.dll)"
 	$(CPP64) $(DEFINES) -c $(SRC)/plugin.cpp -o plugin-x64.o
-	$(LINK64) $(LIBS) resource.res /dll /def:$(SRC)/definition.def /out:plugin-x64.dll plugin-x64.o
+	$(LINK64) $(LIBS) resource.res /dll /def:$(SRC)/plugin.def /out:plugin-x64.dll plugin-x64.o
 	rm plugin-x64.lib
 	@echo "\ndynamic load DLL from a 64bit standalone Executable (.exe)"
 	$(CPP64) $(DEFINES) -c $(SRC)/pluginmain.cpp -o pluginmain-x64.o
@@ -193,7 +202,7 @@ dll:
 	$(LINK32) $(LIBS) resource.res dll-x86.lib /subsystem:console /out:dllmain-x86.exe dllmain-x86.o
 	@echo "\ncreate 32bit C++ Plugin DLL (.dll)"
 	$(CPP32) $(DEFINES) -c $(SRC)/plugin.cpp -o plugin-x86.o
-	$(LINK32) $(LIBS) resource.res /dll /def:$(SRC)/definition.def /out:plugin-x86.dll plugin-x86.o
+	$(LINK32) $(LIBS) resource.res /dll /def:$(SRC)/plugin.def /out:plugin-x86.dll plugin-x86.o
 	rm plugin-x86.lib
 	@echo "\ndynamic load DLL from a 32bit standalone Executable (.exe)"
 	$(CPP32) $(DEFINES) -c $(SRC)/pluginmain.cpp -o pluginmain-x86.o
