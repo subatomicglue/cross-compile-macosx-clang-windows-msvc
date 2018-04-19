@@ -1,7 +1,7 @@
 
 # Cross Compile C/C++ code for Windows, using MacOSX
 
-Here is an example HOWTO to cross compile C/C++ from MacOSX terminal to Windows compatible binaries, using llvm's `clang`/`lld`.
+Here is an example Makefile, as well as example `cmake` platform & toolchains, to cross-compile C/C++ Windows binaries from MacOSX bash terminal, using llvm's `clang`/`lld`.
 
 Included are both 32 and 64bit examples for:
 - `.exe`
