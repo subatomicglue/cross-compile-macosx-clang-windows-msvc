@@ -10,5 +10,9 @@ extern "C"
       printf( "Start Your Engines\nsizeof(size_t): %d\n", (int)sizeof(size_t) );
    }
 
+   // we'll export this with a .def file...
+   void crash() {
+      printf( "Crash!\nsizeof(size_t): %d\n", (int)sizeof(size_t) );
+   }
 }
 

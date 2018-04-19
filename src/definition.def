@@ -1,0 +1,4 @@
+LIBRARY     PLUGIN
+EXPORTS
+	crash
+

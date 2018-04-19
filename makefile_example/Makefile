@@ -12,8 +12,10 @@ SRC=../src
 LIBS=libcmt.lib
 
 # base locations of MSVC toolchain:
-PROGRAMFILES_PATH1=$(HOME)/MSVC                                 # search location #1
-PROGRAMFILES_PATH2=/Volumes/[C] Windows 10/Program Files (x86)  # search location #2
+# search location #1
+PROGRAMFILES_PATH1=$(HOME)/MSVC
+# search location #2
+PROGRAMFILES_PATH2=/Volumes/[C] Windows 10/Program Files (x86)
 PROGRAMFILES_PATH=$(shell if [ -d "$(PROGRAMFILES_PATH1)" ]; then echo "$(PROGRAMFILES_PATH1)"; else echo "$(PROGRAMFILES_PATH2)"; fi )
 WINDOWS_KITS10_PATH=$(PROGRAMFILES_PATH)/Windows Kits/10
 WINDOWS_KITS81_PATH=$(PROGRAMFILES_PATH)/Windows Kits/8.1
@@ -97,6 +99,9 @@ LIB=$(LLVM_PATH)/llvm-lib $(SYSTEM_LIB_INC) /nologo
 LIB32=$(LLVM_PATH)/llvm-lib $(SYSTEM_LIB_INC_32) /nologo
 LIB64=$(LLVM_PATH)/llvm-lib $(SYSTEM_LIB_INC_64) /nologo
 
+# llvm's version of MSVC rc.exe resource compiler
+RC=$(LLVM_PATH)/llvm-rc
+
 all: exe execl lib dll
 
 # executable - compile and link windows .exe
@@ -163,36 +168,39 @@ lib:
 # using clang++ and lld-link
 dll:
 	@echo "\n==================="
+	@echo "compile windows resource (.rc => .res)"
+	$(RC) /FO resource.res $(SRC)/resource.rc
+	@echo "\n==================="
 	@echo "create 64bit C++ DLL (.lib/.dll)"
 	$(CPP64) $(DEFINES) -c $(SRC)/dll.cpp -o dll-x64.o
-	$(LINK64) $(LIBS) /dll /out:dll-x64.dll dll-x64.o
+	$(LINK64) $(LIBS) resource.res /dll /out:dll-x64.dll dll-x64.o
 	@echo "\ndynamic link DLL into a 64bit Executable (.exe)"
 	$(CPP64) $(DEFINES) -c $(SRC)/dllmain.cpp -o dllmain-x64.o
-	$(LINK64) $(LIBS) dll-x64.lib /subsystem:console /out:dllmain-x64.exe dllmain-x64.o
+	$(LINK64) $(LIBS) resource.res dll-x64.lib /subsystem:console /out:dllmain-x64.exe dllmain-x64.o
 	@echo "\ncreate 64bit C++ Plugin DLL (.dll)"
 	$(CPP64) $(DEFINES) -c $(SRC)/plugin.cpp -o plugin-x64.o
-	$(LINK64) $(LIBS) /dll /out:plugin-x64.dll plugin-x64.o
+	$(LINK64) $(LIBS) resource.res /dll /def:$(SRC)/definition.def /out:plugin-x64.dll plugin-x64.o
 	rm plugin-x64.lib
 	@echo "\ndynamic load DLL from a 64bit standalone Executable (.exe)"
 	$(CPP64) $(DEFINES) -c $(SRC)/pluginmain.cpp -o pluginmain-x64.o
-	$(LINK64) $(LIBS) /subsystem:console /out:pluginmain-x64.exe pluginmain-x64.o
+	$(LINK64) $(LIBS) resource.res /subsystem:console /out:pluginmain-x64.exe pluginmain-x64.o
 	@echo "\n==================="
 	@echo "create 32bit C++ DLL (.lib/.dll)"
 	$(CPP32) $(DEFINES) -c $(SRC)/dll.cpp -o dll-x86.o
-	$(LINK32) $(LIBS) /dll /out:dll-x86.dll dll-x86.o
+	$(LINK32) $(LIBS) resource.res /dll /out:dll-x86.dll dll-x86.o
 	@echo "\ndynamic link DLL into a 32bit Executable (.exe)"
 	$(CPP32) $(DEFINES) -c $(SRC)/dllmain.cpp -o dllmain-x86.o
-	$(LINK32) $(LIBS) dll-x86.lib /subsystem:console /out:dllmain-x86.exe dllmain-x86.o
+	$(LINK32) $(LIBS) resource.res dll-x86.lib /subsystem:console /out:dllmain-x86.exe dllmain-x86.o
 	@echo "\ncreate 32bit C++ Plugin DLL (.dll)"
 	$(CPP32) $(DEFINES) -c $(SRC)/plugin.cpp -o plugin-x86.o
-	$(LINK32) $(LIBS) /dll /out:plugin-x86.dll plugin-x86.o
+	$(LINK32) $(LIBS) resource.res /dll /def:$(SRC)/definition.def /out:plugin-x86.dll plugin-x86.o
 	rm plugin-x86.lib
 	@echo "\ndynamic load DLL from a 32bit standalone Executable (.exe)"
 	$(CPP32) $(DEFINES) -c $(SRC)/pluginmain.cpp -o pluginmain-x86.o
-	$(LINK32) $(LIBS) /subsystem:console /out:pluginmain-x86.exe pluginmain-x86.o
+	$(LINK32) $(LIBS) resource.res /subsystem:console /out:pluginmain-x86.exe pluginmain-x86.o
 
 
 
 clean:
-	rm -f *.o *.exe *.dll *.lib *.obj
+	rm -f *.o *.exe *.dll *.lib *.obj *.res
 

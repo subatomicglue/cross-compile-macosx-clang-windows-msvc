@@ -46,5 +46,23 @@ int main()
    {
       printf( "Couldn't find 'vroooom' in DLL plugin\n" );
    }
+
+
+   vroooom_func crash = NULL;
+#if defined(WIN32)
+   crash = (vroooom_func)GetProcAddress( (HMODULE)module, "crash" );
+#else
+   crash = (vroooom_func)dlsym( module, "crash" );
+#endif
+   if (crash)
+   {
+      printf( "Found 'crash', calling:\n" );
+      crash();
+   }
+   else
+   {
+      printf( "Couldn't find 'crash' in DLL plugin\n" );
+   }
+
    return 0;
 }
