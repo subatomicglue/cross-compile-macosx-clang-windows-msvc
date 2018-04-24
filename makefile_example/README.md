@@ -144,3 +144,58 @@ sizeof(size_t): 4
 
 See also: [looking for a cmake version?](../cmake_example/README.md)
 
+
+
+# Install MSVC and clang compiler
+
+## Clang / LLVM on MacOSX
+
+- `brew install llvm` - latest LLVM 6.0.0 for cross compiling to Windows
+
+## Clang / LLVM on Other Platforms
+
+- You can easily [download](http://releases.llvm.org/download.html) prebuilt clang+llvm 6.0.0 binaries for your platform.
+   - see also [http://llvm.org/](http://llvm.org/), or see if `apt-get` or `yum` has `llvm`
+- You may need to edit the `Modules/Platform/LlvmWindowsCrossCompile.cmake` file, to the path you keep clang+llvm.
+
+## MSVC toolchain inc/lib dirs
+
+* NOTE: 2015 or better has the c++11 support you may be looking for.  2013 may be lacking
+* NOTE2: For versions of MSVC other than 2013/2015, you may need to edit the `Modules/Platform/LlvmWindowsCrossCompile.cmake` file with the correct include paths (see below).
+
+### copy your MSVC 2015 include & lib directories to `~/MSVC/`
+
+There is a script for this in [Modules/Platform/copy_msvc](Modules/Platform/copy_msvc)!
+```
+# with windows C:\ mounted under /Volumes/C...
+$ Modules/Platform/copy_msvc "/Volumes/C/Program Files (x86)" 14
+```
+
+Or copy these by hand::
+```
+$HOME/MSVC/Microsoft Visual Studio 14.0/VC/include
+$HOME/MSVC/Microsoft Visual Studio 14.0/VC/lib
+$HOME/MSVC/Windows Kits/8.1/Include
+$HOME/MSVC/Windows Kits/8.1/Lib
+$HOME/MSVC/Windows Kits/10/Include
+$HOME/MSVC/Windows Kits/10/Lib
+```
+
+### copy your MSVC 2013 include & lib directories to `~/MSVC/`
+
+There is a script for this in [Modules/Platform/copy_msvc](Modules/Platform/copy_msvc)!
+```
+# with windows C:\ mounted under /Volumes/C...
+$ Modules/Platform/copy_msvc "/Volumes/C/Program Files (x86)" 12
+```
+
+Or copy these by hand::
+```
+$HOME/MSVC/Microsoft Visual Studio 12.0/VC/include
+$HOME/MSVC/Microsoft Visual Studio 12.0/VC/lib
+$HOME/MSVC/Windows Kits/8.0/Include
+$HOME/MSVC/Windows Kits/8.0/Lib
+$HOME/MSVC/Windows Kits/8.1/Include
+$HOME/MSVC/Windows Kits/8.1/Lib
+```
+
