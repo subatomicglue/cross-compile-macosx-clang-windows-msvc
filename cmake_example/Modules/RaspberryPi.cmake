@@ -3,6 +3,8 @@
 # - on non-windows platforms
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules/RaspberryPi.cmake
 #
+# see here for proper setup of your raspberry pi SDK on macosx
+# https://github.com/subatomicglue/cross_compile_raspberrypi_on_macosx
 
 set(RASPBERRYPI 1)
 set(APPLE 0)
