@@ -1,0 +1,8 @@
+
+rm -rf raspberrypi && mkdir -p raspberrypi && cd raspberrypi
+
+cmake -DCMAKE_TOOLCHAIN_FILE=Modules/RaspberryPi.cmake .. && make
+
+ls
+cd -
+

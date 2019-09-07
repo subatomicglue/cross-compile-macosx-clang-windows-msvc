@@ -145,6 +145,11 @@ Makefile		dllmain-x86.exe		mainCPP-x86.exe		test.bat
 cmake_install.cmake	lib-x86.lib		plugin-x86.dll
 ```
 
+Can't load a plugin or `.so`?  You may need `LD_LIBRARY_PATH`:
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+```
+
 What's it look like? (64 bit):
 ```
 $ cmake -DCMAKE_TOOLCHAIN_FILE=Modules/Windows64.cmake ..

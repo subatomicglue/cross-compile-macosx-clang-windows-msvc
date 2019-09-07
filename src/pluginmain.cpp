@@ -14,6 +14,8 @@ int main()
    bool is64 = sizeof(size_t) == 8;
 #if defined(WIN32)
    const char* plugin_filename = is64 ? "plugin-x64.dll" : "plugin-x86.dll";
+#elif defined(__arm__)
+   const char* plugin_filename = is64 ? "libplugin-arm.so" : "libplugin-arm.so";
 #else
    const char* plugin_filename = is64 ? "libplugin-x64.so" : "libplugin-x86.so";
 #endif

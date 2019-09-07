@@ -91,6 +91,8 @@ ADD_EXECUTABLE(pluginmain-${ARCH} ${SRC}/pluginmain.cpp ${EXTRA_SOURCES})
 if (WIN32)
    target_link_libraries( pluginmain-${ARCH} optimized  "libcmt" )
    target_link_libraries( pluginmain-${ARCH} debug  "libcmtd" )
+elseif(RASPBERRYPI)
+  TARGET_LINK_LIBRARIES(pluginmain-${ARCH} dl)
 endif()
 
 
