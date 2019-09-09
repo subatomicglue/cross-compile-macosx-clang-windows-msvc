@@ -3,8 +3,10 @@
 # - on non-windows platforms
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules/RaspberryPi.cmake
 #
-# see here for proper setup of your raspberry pi SDK on macosx
-# https://github.com/subatomicglue/cross_compile_raspberrypi_on_macosx
+# to setup RaspberryPi compiler toolchain, run the Platform/install-raspberrypi-*.sh scripts:
+# - Platform/install-raspberrypi-toolchain.sh  # builds an SDK directory with base LLVM cross-compiler
+# - Platform/install-raspberrypi-sysroot.sh    # copy lib/includes from working RaspberryPi to SDK directory
+#
 
 set(RASPBERRYPI 1)
 set(APPLE 0)
@@ -25,7 +27,7 @@ set( CMAKE_VERBOSE_MAKEFILE ON CACHE INTERNAL "" FORCE)
 
 
 set( SDK $ENV{HOME}/RPI_SDK )
-set( BINTOOLS ${SDK}/binutils-2.28/build )
+set( BINTOOLS ${SDK}/compiler )
 set( SYSROOT ${SDK}/sysroot )
 set( INCLUDE_PATH1 ${SYSROOT})
 set( INCLUDE_PATH2 ${SYSROOT}/usr/include/c++/4.9)

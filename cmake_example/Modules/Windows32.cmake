@@ -6,6 +6,12 @@
 # - on Windows will generate a .sln project/solution for visual studio
 #   call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Windows32.cmake -G "Visual Studio 14" ..
+#
+# to set up MSVC compiler toolchain, run the Platform/install-msvc-*.sh scripts:
+# - Platform/install-msvc-toolchain.sh  # builds an SDK directory with base LLVM cross-compiler
+# - Platform/install-msvc-sysroot.sh    # copy lib/includes from MSVC compiler to SDK directory
+#
+
 if (NOT WIN32)
    #message( "We're going to use LLVM to cross compile to Windows for you" )
    set( CMAKE_SYSTEM_NAME LlvmWindowsCrossCompile )
