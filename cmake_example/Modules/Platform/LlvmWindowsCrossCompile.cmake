@@ -37,20 +37,36 @@ endforeach()
 #     and subsequent times the variables passed into cmake -D then become unset
 # Got a solution - anyone?  Until then, I'll hardcode a couple fallback paths...
 
+################################################################
 # list of paths to look for the base MSVC inc/lib dirs
 # ordered by least to highest priority (last one wins)
 #
 # tested: MSVC 2013 and MSVC 2015 - you may have to modify/extend the below to match other versions of MSVC!
 set( PROGRAMFILES_LOCATIONS
    "/Volumes/[C] Windows 10/Program Files (x86)"
-   "$ENV{HOME}/MSVC"
-   "./MSVC"
+   "$ENV{HOME}/MSVC_SDK/sysroot"
+   "./MSVC_SDK"
+  CACHE STRING "" FORCE
 )
-# see which path exists:
+
+################################################################
+# list of paths to look for the base LLVM bin/include/lib dirs
+# ordered by least to highest priority (last one wins)
+set( LLVM_LOCATIONS
+   "/usr/local/opt/llvm/bin"
+   "$ENV{HOME}/MSVC_SDK/compiler/bin"
+  CACHE STRING "" FORCE
+)
+
+
+
+
+################################################################
+# see which MSVC path exists:
 if (NOT EXISTS PROGRAMFILES)
    foreach( path ${PROGRAMFILES_LOCATIONS} )
       IF(EXISTS "${path}")
-         set( PROGRAMFILES "${path}")
+         set( PROGRAMFILES "${path}" CACHE STRING "" FORCE)
       endif()
    endforeach()
 endif()
@@ -58,14 +74,24 @@ IF(NOT EXISTS "${PROGRAMFILES}")
    message(FATAL_ERROR "\nERROR: MSVC BASE INC/LIB DIRECTORY DOESNT EXIST:\n    PROGRAMFILES=${PROGRAMFILES}\nLocation doesn't exist, please mount it, or install MSVC version v2013 or 2015 (or greater)\nOr put a copy under one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
 endif()
 
-# LLVM binary location
-if (NOT DEFINED LLVM_PATH)
-   set( LLVM_PATH "/usr/local/opt/llvm/bin" )
+################################################################
+# see which LLVM path exists:
+if (NOT EXISTS LLVM_PATH)
+   foreach( path ${LLVM_LOCATIONS} )
+      IF(EXISTS "${path}")
+         set( LLVM_PATH "${path}" CACHE STRING "" FORCE)
+         #message( "found LLVM in ${LLVM_PATH}" )
+      endif()
+   endforeach()
 endif()
 IF(NOT EXISTS "${LLVM_PATH}")
-   message(FATAL_ERROR "\n\nERROR: LLVM DIRECTORY ${LLVM_PATH} DOESNT EXIST:\n    ${LLVM_PATH}\nLocation doesn't exist.  Try `brew install llvm`.\n\n" )
+  message(FATAL_ERROR "\nERROR: LLVM DIRECTORY DOESNT EXIST:\n    LLVM_PATH=${LLVM_PATH}\nLocation doesn't exist, please install llvm using `brew install llvm`\nOr use the 'install-msvc-toolchain.sh' script to put a copy under one of the locations:\n\"${LLVM_LOCATIONS}\"\n\n" )
 endif()
 
+
+
+
+################################################################
 # MSVC location:
 # http://marcofoco.com/microsoft-visual-c-version-map/
 set( MSVC_BASE_LOCATIONS
@@ -74,26 +100,26 @@ set( MSVC_BASE_LOCATIONS
    "${PROGRAMFILES}/Microsoft Visual Studio 12.0/VC" # 2013
    "${PROGRAMFILES}/Microsoft Visual Studio 11.0/VC" # 2012
    "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC" # 2010
-)
+CACHE STRING "" FORCE)
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC") # 2017
    set( _MSC_VER 1910 )
-   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC" )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC"   CACHE STRING "" FORCE)
 endif()
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 14.0/VC") # 2015
    set( _MSC_VER 1900 )
-   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 14.0/VC" )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 14.0/VC"   CACHE STRING "" FORCE)
 endif()
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 12.0/VC") # 2013
    set( _MSC_VER 1800 )
-   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 12.0/VC" )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 12.0/VC"   CACHE STRING "" FORCE)
 endif()
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 11.0/VC") # 2012
    set( _MSC_VER 1700 )
-   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 11.0/VC" )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 11.0/VC"   CACHE STRING "" FORCE)
 endif()
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC") # 2010
    set( _MSC_VER 1600 )
-   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC" )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC"   CACHE STRING "" FORCE)
 endif()
 if (NOT DEFINED _MSC_VER)
    message(FATAL_ERROR "\n\nERROR: 'Microsoft Visual Studio x.x/VC' not found in '${PROGRAMFILES}'.\n\nPlease install MSVC incs/libs in one of the locations:\n\"${PROGRAMFILES_LOCATIONS}\"\n\n" )
@@ -114,7 +140,7 @@ endif()
 
 # add on the windowkit dirs
 IF(EXISTS "${PROGRAMFILES}/Windows Kits/10")
-   set( WINKIT10_BASE_DIR "${PROGRAMFILES}/Windows Kits/10" )
+   set( WINKIT10_BASE_DIR "${PROGRAMFILES}/Windows Kits/10"   CACHE STRING "" FORCE)
    include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include)
    include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include/10.0.10150.0/ucrt)
    include_directories(SYSTEM ${WINKIT10_BASE_DIR}/Include/10.0.10240.0/ucrt)
@@ -126,7 +152,7 @@ IF(EXISTS "${PROGRAMFILES}/Windows Kits/10")
    endforeach()
 endif()
 IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.1")
-   set( WINKIT81_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.1" )
+   set( WINKIT81_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.1"   CACHE STRING "" FORCE)
    include_directories(SYSTEM ${WINKIT81_BASE_DIR}/Include/um)
    include_directories(SYSTEM ${WINKIT81_BASE_DIR}/Include/shared)
    foreach(lang C CXX)
@@ -134,7 +160,7 @@ IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.1")
    endforeach()
 endif()
 IF(EXISTS "${PROGRAMFILES}/Windows Kits/8.0")
-   set( WINKIT80_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.0" )
+   set( WINKIT80_BASE_DIR "${PROGRAMFILES}/Windows Kits/8.0"   CACHE STRING "" FORCE)
    include_directories(SYSTEM ${WINKIT80_BASE_DIR}/Include/um)
    foreach(lang C CXX)
       set( CMAKE_LIB_SYSTEM_PATHS_${lang} "${CMAKE_LIB_SYSTEM_PATHS_${lang}} /libpath:\"${WINKIT80_BASE_DIR}/Lib/Win8/um/${ARCH}\"" CACHE STRING "" FORCE )
