@@ -18,7 +18,7 @@ fi
 
 SYS_ROOT=$SDK/sysroot
 RPI_USER=pi
-RPI_HOST=octopi
+RPI_HOST=raspberrypi.local
 
 
 mkdir -p $SYS_ROOT
