@@ -87,6 +87,18 @@ SET(INSTALL_RPATH_USE_LINK_PATH True CACHE INTERNAL "" FORCE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH True CACHE INTERNAL "" FORCE)
 SET(BUILD_WITH_INSTALL_RPATH True CACHE INTERNAL "" FORCE)
 
+
+# -mtls-dialect=gnu2              # doesn't work with clang
+# -Otime                          # doesn't work with clang
+# -mvectorize-with-neon-quad      # doesn't work with clang
+
+SET( PI_DEFAULT_RELEASE_FLAGS "-O3 -DNDEBUG" )
+SET( PI1_RELEASE_FLAGS "-mcpu=arm1176jzf-s  -mfpu=vfp  -march=armv7-a -mtune=arm1176jzf-s" )
+SET( PI2_RELEASE_FLAGS "-mcpu=cortex-a7  -mfpu=neon-vfpv4  -march=armv7-a -mtune=cortex-a7" )
+SET( PI3_RELEASE_FLAGS "-mcpu=cortex-a53  -mfpu=neon-fp-armv8 -march=armv8-a+crc -mtune=cortex-a53" )
+SET( PI4_RELEASE_FLAGS "-mcpu=cortex-a72  -mfpu=neon-fp-armv8 -march=armv8-a+crc -mtune=cortex-a72" )
+SET( PI_RELEASE_FLAGS "${PI_DEFAULT_RELEASE_FLAGS} -O3 -DNDEBUG -marm -mabi=aapcs-linux -mfloat-abi=hard -funsafe-math-optimizations -mhard-float -mlittle-endian -mno-unaligned-access" CACHE INTERNAL "" FORCE )
+
 # to choose between these you'll need to define CMAKE_BUILD_TYPE
 # options: Debug, Release, RelWithDebInfo, MinSizeRel
 # e.g.
@@ -98,7 +110,7 @@ SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE INTERNAL "" FORCE)
 
 SET (CMAKE_CXX_FLAGS_DEBUG          "-g" CACHE INTERNAL "" FORCE)
 SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG" CACHE INTERNAL "" FORCE)
-SET (CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG" CACHE INTERNAL "" FORCE)
+SET (CMAKE_CXX_FLAGS_RELEASE        "${PI_RELEASE_FLAGS}" CACHE INTERNAL "" FORCE)
 SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g" CACHE INTERNAL "" FORCE)
 
 SET(CMAKE_C_FLAGS "" CACHE INTERNAL "" FORCE)
