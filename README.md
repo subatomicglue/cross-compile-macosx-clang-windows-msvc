@@ -1,6 +1,8 @@
 
 # Cross-Compile C/C++ Windows binaries from MacOSX bash terminal
 
+(Update: RaspberryPI cross compile has also been added, see source code)
+
 Here is an example Makefile, as well as example `cmake` platform & toolchains, to cross-compile C/C++ Windows binaries from MacOSX bash terminal, using llvm's `clang`/`lld`.
 
 Included are both 32 and 64bit examples for:
