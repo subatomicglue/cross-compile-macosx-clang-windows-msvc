@@ -32,7 +32,7 @@ A simple example illustrating how to cross-compile C/C++ Windows binaries from a
 
 ## CMake example:
 
-A more advanced example, with reusable `cmake` toolchain for cross-compiling C/C++ Windows binaries under MacOSX, using the LLVM clang compiler.
+A more advanced example, with reusable `cmake` toolchain for cross-compiling C/C++ Windows (and RaspberryPI) binaries under MacOSX, using the LLVM clang compiler.
 
 * [cmake_example/](cmake_example/)
 
