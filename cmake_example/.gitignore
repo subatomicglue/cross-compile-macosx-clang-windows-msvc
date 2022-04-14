@@ -1,0 +1,7 @@
+build-win32/
+build-win64/
+buildcross-win32/
+buildcross-win64/
+build32/
+build64/
+
