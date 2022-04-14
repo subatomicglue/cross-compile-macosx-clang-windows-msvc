@@ -8,6 +8,9 @@
 #   cmake -DCMAKE_TOOLCHAIN_FILE=Modules\Native64.cmake -G "Visual Studio 14 Win64" ..
 
 if (NOT WIN32)
+   # you can build a hybrid Intel/AppleSilicon bundle using:   -arch arm64 -arch x86_64
+   # to add that in, just use:    cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+
    #message( "We're going to build using native compiler for you" )
    set( CMAKE_C_FLAGS_INIT -m64 CACHE STRING "" FORCE)
    set( CMAKE_CXX_FLAGS_INIT -m64 CACHE STRING "" FORCE)
@@ -18,7 +21,7 @@ if (NOT WIN32)
    set( CMAKE_LIBRARY_ARCHITECTURE x64  CACHE STRING "" FORCE)
    set( ARCH x64  CACHE STRING "" FORCE)
 else()
-   #message( "We're going to build using visual studio for you" )
+   #message( "Looks like you're actually on Windows 64bit with " ${CMAKE_GENERATOR} " sure I know how to do that" )
    if (NOT DEFINED CMAKE_GENERATOR)
       set( CMAKE_GENERATOR "Visual Studio 14 Win64" )
    endif()

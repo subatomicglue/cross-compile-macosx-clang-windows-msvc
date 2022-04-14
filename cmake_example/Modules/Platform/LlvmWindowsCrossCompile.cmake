@@ -8,7 +8,7 @@
 SET(CMAKE_SYSTEM_NAME LlvmWindowsCrossCompile CACHE STRING "Target system.")
 
 # if you want to see the compiler commands, set to TRUE
-SET( VERBOSE_OUTPUT TRUE )
+SET( VERBOSE_OUTPUT FALSE )
 
 # useful paths:
 #    /usr/local/Cellar/cmake/3.10.3/share/cmake/Modules/Platform/Windows-MSVC.cmake
@@ -20,6 +20,8 @@ set(APPLE 0)
 set(MSVC 1)
 set(WIN32 1)
 
+
+#set( CMAKE_GENERATOR_TOOLSET ClangCL CACHE STRING "" FORCE )
 
 # x64 or x86
 if (NOT DEFINED ARCH)
@@ -67,6 +69,7 @@ if (NOT EXISTS PROGRAMFILES)
    foreach( path ${PROGRAMFILES_LOCATIONS} )
       IF(EXISTS "${path}")
          set( PROGRAMFILES "${path}" CACHE STRING "" FORCE)
+         #break()  # uncomment to use first found instead of last found
       endif()
    endforeach()
 endif()
@@ -79,8 +82,9 @@ endif()
 if (NOT EXISTS LLVM_PATH)
    foreach( path ${LLVM_LOCATIONS} )
       IF(EXISTS "${path}")
-         set( LLVM_PATH "${path}" CACHE STRING "" FORCE)
          #message( "found LLVM in ${LLVM_PATH}" )
+         set( LLVM_PATH "${path}" CACHE STRING "" FORCE)
+         #break()  # uncomment to use first found instead of last found
       endif()
    endforeach()
 endif()
@@ -95,12 +99,25 @@ endif()
 # MSVC location:
 # http://marcofoco.com/microsoft-visual-c-version-map/
 set( MSVC_BASE_LOCATIONS
+   "${PROGRAMFILES}/Microsoft Visual Studio 17.0/VC" # 2022
+   "${PROGRAMFILES}/Microsoft Visual Studio 16.0/VC" # 2019
    "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC" # 2017
    "${PROGRAMFILES}/Microsoft Visual Studio 14.0/VC" # 2015
    "${PROGRAMFILES}/Microsoft Visual Studio 12.0/VC" # 2013
    "${PROGRAMFILES}/Microsoft Visual Studio 11.0/VC" # 2012
    "${PROGRAMFILES}/Microsoft Visual Studio 10.0/VC" # 2010
 CACHE STRING "" FORCE)
+
+# MSC_VER defined here
+# https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B
+IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 17.0/VC") # 2022
+   set( _MSC_VER 1910 )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 17.0/VC"   CACHE STRING "" FORCE)
+endif()
+IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 16.0/VC") # 2019
+   set( _MSC_VER 1910 )
+   set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 16.0/VC"   CACHE STRING "" FORCE)
+endif()
 IF(EXISTS "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC") # 2017
    set( _MSC_VER 1910 )
    set( MSVC_BASE_DIR "${PROGRAMFILES}/Microsoft Visual Studio 15.0/VC"   CACHE STRING "" FORCE)
@@ -186,6 +203,11 @@ else()
   set(CMAKE_CL_NOLOGO "/nologo")
 endif()
 
+###  A note about this:   looks like clang, clang+ and lld are pretty standard, while clang-cl and lld-link don't seem to appear in macOS v13 of LLVM.
+###  so let's try to use the standard ones...
+
+### a 2nd note about this, you can install your own LLVM and gett he clang-cl and lld-link drivers included.
+
 # set to TRUE to use clang-cl, or FALSE to use clang -target, both work...
 set( USE_CL TRUE )
 # set to TRUE to use lld-link, or FALSE to use lld -flavor link, both work...
@@ -193,27 +215,50 @@ set( USE_LINK TRUE )
 
 if (NOT USE_CL)
    # compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
-   add_definitions( -target ${triple} -DWIN32 -D_WINDOWS -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing )
+   add_definitions( -DWIN32 -D_WINDOWS )
 else()
    # compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
-   add_definitions( /DWIN32 /D_WINDOWS -fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing )
+   add_definitions( /DWIN32 /D_WINDOWS )
 endif()
 
 set(CMAKE_SYSROOT "")
+# set( CMAKE_C_FLAGS_INIT "" )
+# set( CMAKE_CXX_FLAGS_INIT "" )
+# set( CMAKE_C_FLAGS "" )
+# set( CMAKE_CXX_FLAGS "" )
+
+# use the compiler to generate dependencies
+#set( CMAKE_DEPENDS_USE_COMPILER FALSE )
 
 foreach(lang C CXX)
    set( CMAKE_${lang}_COMPILE_OPTIONS_PIC "" ) # no -fPIC in windows land
    set( CMAKE_SHARED_LIBRARY_${lang}_FLAGS "" )
    if (NOT USE_CL)
+      # compiler clang (same interface as gcc, with -target i386-pc-win32 outputs MSVC .obj files
+      SET( CMAKE_${lang}_COMPILER_TARGET ${triple})
       set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem" CACHE STRING "" FORCE )
    else()
+      # compiler clang-cl  (clang-cl has same interface as cl.exe... outputs MSVC .obj files)
       set( CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "/imsvc" CACHE STRING "" FORCE )
    endif()
+   #message( CMAKE_${lang}_FLAGS "-->" ${CMAKE_${lang}_FLAGS} )
+   #message( CMAKE_${lang}_FLAGS_INIT "-->" ${CMAKE_${lang}_FLAGS_INIT} )
+   set( CMAKE_${lang}_FLAGS "-fmsc-version=${_MSC_VER} -fms-extensions -fms-compatibility -fdelayed-template-parsing" CACHE STRING "" FORCE )
 endforeach()
 #set( CMAKE_SHARED_LINKER_FLAGS "" )
 
+
+
+#message( CMAKE_EFFECTIVE_SYSTEM_NAME " --> " ${CMAKE_EFFECTIVE_SYSTEM_NAME} )
+#message( CMAKE_C_COMPILER_ID " --> " ${CMAKE_C_COMPILER_ID} )
+#message( CMAKE_CXX_COMPILER_ID " --> " ${CMAKE_CXX_COMPILER_ID} )
+#message( CMAKE_BASE_NAME " --> " ${CMAKE_BASE_NAME} )
+#message( CMAKE_SYSTEM_PROCESSOR " --> " ${CMAKE_SYSTEM_PROCESSOR} )
+
 if (NOT USE_CL)
    # compiler clang/clang++
+   set( CMAKE_C_COMPILER_ID Clang )
+   set( CMAKE_CXX_COMPILER_ID Clang )
    set( CMAKE_C_COMPILER "${LLVM_PATH}/clang" CACHE STRING "" FORCE)
    set( CMAKE_CXX_COMPILER "${LLVM_PATH}/clang++" CACHE STRING "" FORCE)
    set( C_COMPILE_OBJECT_OUTPUT_FLAG -o )
@@ -224,6 +269,10 @@ if (NOT USE_CL)
    set( CXX_COMPILE_OBJECT_SOURCE_FLAG "")
 else()
    # compiler clang-cl
+   set( CMAKE_C_COMPILER_ID Clang )
+   set( CMAKE_C_SIMULATE_ID MSVC )
+   set( CMAKE_CXX_COMPILER_ID Clang )
+   set( CMAKE_CXX_SIMULATE_ID MSVC )
    set( CMAKE_C_COMPILER "${LLVM_PATH}/clang-cl" CACHE STRING "" FORCE)
    set( CMAKE_CXX_COMPILER "${LLVM_PATH}/clang-cl" CACHE STRING "" FORCE)
    set( C_COMPILE_OBJECT_OUTPUT_FLAG /o )
@@ -242,7 +291,7 @@ if (NOT USE_LINK)
    # lld -flavor link (llvm's version of MSVC's link.exe)
    set( CMAKE_LINKER "${LLVM_PATH}/lld" CACHE STRING "" FORCE)
    foreach(lang C CXX)
-      set( CMAKE_${lang}_SYSTEM_LINK_FLAGS "-flavor link" CACHE STRING "" FORCE)
+      set( CMAKE_${lang}_SYSTEM_LINK_FLAGS "-flavor link libcmt.lib" CACHE STRING "" FORCE)
    endforeach()
 else()
    # lld-link (llvm's version of MSVC's link.exe)
